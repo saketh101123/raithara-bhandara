@@ -1,11 +1,13 @@
 
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -14,13 +16,28 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <h1 className="text-xl font-display font-bold text-primary">Raithara Bhandara</h1>
-          </Link>
+          <div className="flex items-center space-x-4">
+            {location.pathname !== '/' && (
+              <Button 
+                variant="ghost" 
+                onClick={handleBack} 
+                className="mr-2"
+              >
+                Back
+              </Button>
+            )}
+            <Link to="/" className="flex items-center space-x-2">
+              <h1 className="text-xl font-display font-bold text-primary">Raithara Bhandara</h1>
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -36,7 +53,7 @@ const Navbar = () => {
             <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'text-primary' : ''}`}>
               Contact
             </Link>
-            <button className="btn-primary">Get Started</button>
+            <Link to="/login" className="btn-primary">Login</Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,7 +94,13 @@ const Navbar = () => {
               >
                 Contact
               </Link>
-              <button className="btn-primary w-full">Get Started</button>
+              <Link 
+                to="/login" 
+                className="btn-primary w-full text-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
             </div>
           </div>
         )}
