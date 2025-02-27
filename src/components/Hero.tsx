@@ -1,5 +1,7 @@
 
 import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Hero = () => {
   return (
@@ -18,12 +20,16 @@ const Hero = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" 
                style={{ animationDelay: '0.4s' }}>
-            <button className="btn-primary flex items-center gap-2">
-              Find Storage <ChevronRight size={20} />
-            </button>
-            <button className="px-6 py-3 text-primary hover:text-primary/80 transition-colors">
-              Learn More
-            </button>
+            <Link to="/warehouses">
+              <Button className="flex items-center gap-2">
+                Find Storage <ChevronRight size={20} />
+              </Button>
+            </Link>
+            <Link to="/features">
+              <Button variant="outline" className="px-6 py-3 text-primary hover:text-primary/80 transition-colors">
+                Learn More
+              </Button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 animate-fade-up" 

@@ -1,5 +1,6 @@
 
 import { MapPin, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const warehouses = [
   {
@@ -65,10 +66,12 @@ const FeaturedWarehouses = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Capacity: {warehouse.capacity}</span>
-                  <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg 
-                                   hover:bg-primary/20 transition-colors">
-                    View Details
-                  </button>
+                  <Link to={`/payment/${warehouse.id}`}>
+                    <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg 
+                                    hover:bg-primary/20 transition-colors">
+                      View Details
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
