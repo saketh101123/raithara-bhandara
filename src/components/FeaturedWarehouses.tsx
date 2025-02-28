@@ -1,33 +1,10 @@
 
 import { MapPin, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { warehousesData } from '@/data/warehousesData';
 
-const warehouses = [
-  {
-    id: 1,
-    name: 'Bangalore Central Storage',
-    location: 'Bangalore Rural',
-    rating: 4.8,
-    capacity: '5000 MT',
-    image: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 2,
-    name: 'Mysore Cold Storage',
-    location: 'Mysore',
-    rating: 4.7,
-    capacity: '3000 MT',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 3,
-    name: 'Hassan Agri Store',
-    location: 'Hassan',
-    rating: 4.9,
-    capacity: '4000 MT',
-    image: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?auto=format&fit=crop&w=800&q=80'
-  }
-];
+// Use the first 3 warehouses from the shared data
+const featuredWarehouses = warehousesData.slice(0, 3);
 
 const FeaturedWarehouses = () => {
   return (
@@ -41,7 +18,7 @@ const FeaturedWarehouses = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {warehouses.map((warehouse, index) => (
+          {featuredWarehouses.map((warehouse, index) => (
             <div key={warehouse.id} 
                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-up"
                  style={{ animationDelay: `${index * 0.1 + 0.1}s` }}>
@@ -66,7 +43,7 @@ const FeaturedWarehouses = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Capacity: {warehouse.capacity}</span>
-                  <Link to={`/payment/${warehouse.id}`}>
+                  <Link to={`/warehouse/${warehouse.id}`}>
                     <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg 
                                     hover:bg-primary/20 transition-colors">
                       View Details
