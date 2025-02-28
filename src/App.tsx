@@ -12,6 +12,7 @@ import WarehouseDetails from "./pages/WarehouseDetails";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/payment/:warehouseId" element={<Payment />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
