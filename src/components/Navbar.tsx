@@ -1,13 +1,21 @@
 
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -53,7 +61,28 @@ const Navbar = () => {
             <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'text-primary' : ''}`}>
               Contact
             </Link>
-            <Link to="/login" className="btn-primary">Login</Link>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User size={16} />
+                    Account
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="text-sm text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()} className="gap-2 cursor-pointer">
+                    <LogOut size={16} />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/login" className="btn-primary">Login</Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -94,13 +123,28 @@ const Navbar = () => {
               >
                 Contact
               </Link>
-              <Link 
-                to="/login" 
-                className="btn-primary w-full text-center"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
+              
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  className="gap-2 w-full justify-start"
+                  onClick={() => {
+                    signOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut size={16} />
+                  Logout ({user.email})
+                </Button>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="btn-primary w-full text-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         )}
