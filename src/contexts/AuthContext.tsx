@@ -49,14 +49,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        throw error;
+        // If the error is about email not being confirmed
+        if (error.message.includes("Email not confirmed")) {
+          toast({
+            title: "Email not confirmed",
+            description: "Please check your email for a confirmation link or try signing up again",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in",
+        });
+        navigate("/");
       }
-      
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in",
-      });
-      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error signing in",
@@ -71,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -79,6 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             first_name: firstName,
             last_name: lastName,
           },
+          // Skip email confirmation for development
+          emailRedirectTo: window.location.origin,
         },
       });
       
@@ -86,11 +97,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
       
-      toast({
-        title: "Account created",
-        description: "Please check your email for confirmation",
-      });
-      navigate("/");
+      // If the sign-up was successful and email confirmation is not enforced
+      if (data.user && !data.user.identities?.[0].identity_data?.email_verified) {
+        toast({
+          title: "Account created",
+          description: "You can now log in with your credentials",
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: "Account created",
+          description: "Please check your email for confirmation",
+        });
+        navigate("/");
+      }
     } catch (error: any) {
       toast({
         title: "Error signing up",

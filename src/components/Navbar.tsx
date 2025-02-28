@@ -71,8 +71,9 @@ const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="text-sm text-muted-foreground">
-                    {user.email}
+                  <DropdownMenuItem onClick={() => navigate("/profile")} className="gap-2 cursor-pointer">
+                    <User size={16} />
+                    Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => signOut()} className="gap-2 cursor-pointer">
                     <LogOut size={16} />
@@ -125,17 +126,30 @@ const Navbar = () => {
               </Link>
               
               {user ? (
-                <Button 
-                  variant="outline" 
-                  className="gap-2 w-full justify-start"
-                  onClick={() => {
-                    signOut();
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <LogOut size={16} />
-                  Logout ({user.email})
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2 w-full justify-start"
+                    onClick={() => {
+                      navigate("/profile");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <User size={16} />
+                    Profile
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2 w-full justify-start"
+                    onClick={() => {
+                      signOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <Link 
                   to="/login" 
