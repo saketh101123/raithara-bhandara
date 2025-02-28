@@ -12,6 +12,7 @@ const Register = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +34,15 @@ const Register = () => {
     }
 
     try {
-      await signUp(email, password, firstName, lastName);
+      await signUp(email, password, firstName, lastName, phoneNumber);
       // The navigate is handled in the signUp function in AuthContext
     } catch (error) {
       console.error("Registration error:", error);
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };
@@ -82,6 +88,16 @@ const Register = () => {
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input 
+                id="phoneNumber" 
+                type="tel" 
+                value={phoneNumber} 
+                onChange={(e) => setPhoneNumber(e.target.value)} 
+                placeholder="e.g. +91 9876543210"
               />
             </div>
             <div className="space-y-2">
