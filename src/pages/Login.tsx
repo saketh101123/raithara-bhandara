@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,22 @@ import { Label } from "@/components/ui/label";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, isLoading } = useAuth();
+  const { signIn, isLoading, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const returnUrl = location.state?.returnUrl || "/";
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate(returnUrl);
+    }
+  }, [user, navigate, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await signIn(email, password);
+    // The navigation will be handled by the useEffect after successful login
   };
 
   return (
@@ -23,7 +34,7 @@ const Login = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            {returnUrl !== "/" ? "Login to continue with your booking" : "Enter your email and password to access your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>

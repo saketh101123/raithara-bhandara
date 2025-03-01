@@ -1,64 +1,21 @@
-
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Calendar, Lock, Check, AlertCircle } from 'lucide-react';
+import { CreditCard, Calendar, Lock, Check, AlertCircle, Printer, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Mock warehouse data - in a real app, this would come from an API
-const warehouses = [
-  {
-    id: 1,
-    name: 'Bangalore Central Storage',
-    location: 'Bangalore Rural',
-    price: '₹35/quintal/day',
-    image: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 2,
-    name: 'Mysore Cold Storage',
-    location: 'Mysore',
-    price: '₹32/quintal/day',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 3,
-    name: 'Hassan Agri Store',
-    location: 'Hassan',
-    price: '₹30/quintal/day',
-    image: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 4,
-    name: 'Tumkur Farmer Storage',
-    location: 'Tumkur',
-    price: '₹28/quintal/day',
-    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 5,
-    name: 'Mandya Agricultural Warehouse',
-    location: 'Mandya',
-    price: '₹31/quintal/day',
-    image: 'https://images.unsplash.com/photo-1512467627024-7a5e9c576d24?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 6,
-    name: 'Kolar Gold Storage',
-    location: 'Kolar',
-    price: '₹33/quintal/day',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80'
-  }
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { warehousesData } from '@/data/warehousesData';
 
 const Payment = () => {
   const { warehouseId } = useParams<{ warehouseId: string }>();
   const navigate = useNavigate();
+  const { user, session } = useAuth();
+  const printRef = useRef<HTMLDivElement>(null);
   
-  const warehouse = warehouses.find(w => w.id === Number(warehouseId));
+  const warehouse = warehousesData.find(w => w.id === Number(warehouseId));
   
   const [formData, setFormData] = useState({
     quantity: '10', // in quintals
@@ -74,6 +31,27 @@ const Payment = () => {
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState({
+    bookingId: '',
+    userName: '',
+    userEmail: '',
+    userPhone: '',
+    totalAmount: 0,
+    bookingDate: ''
+  });
+
+  useEffect(() => {
+    if (!user) {
+      toast.error("Please log in to book storage");
+      navigate('/login', { state: { returnUrl: `/payment/${warehouseId}` } });
+    }
+  }, [user, navigate, warehouseId]);
+  
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    setFormData(prev => ({ ...prev, startDate: formattedDate }));
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -88,9 +66,25 @@ const Payment = () => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false);
+      
+      const bookingId = `RB${Math.floor(Math.random() * 10000)}`;
+      const userName = `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`;
+      const userEmail = user?.email || '';
+      const userPhone = user?.user_metadata?.phone_number || '';
+      const totalAmount = getTotalPrice();
+      const bookingDate = new Date().toLocaleDateString();
+      
+      setBookingDetails({
+        bookingId,
+        userName,
+        userEmail,
+        userPhone,
+        totalAmount,
+        bookingDate
+      });
+      
       setBookingComplete(true);
       toast.success("Payment successful! Your storage is booked.");
     }, 2000);
@@ -100,6 +94,105 @@ const Payment = () => {
     if (!warehouse) return 0;
     const pricePerDay = parseInt(warehouse.price.replace(/[^0-9]/g, ''));
     return pricePerDay * Number(formData.quantity) * Number(formData.duration);
+  };
+
+  const handlePrint = () => {
+    const content = printRef.current;
+    if (!content) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error("Could not open print window. Please check your popup settings.");
+      return;
+    }
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Booking Confirmation - ${bookingDetails.bookingId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #166534; }
+            .title { font-size: 20px; margin: 10px 0; }
+            .details { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+            .row { display: flex; margin-bottom: 10px; }
+            .label { font-weight: bold; width: 200px; }
+            .value { flex: 1; }
+            .footer { margin-top: 40px; text-align: center; font-size: 14px; color: #666; }
+            @media print {
+              body { padding: 0; }
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">Raithara Bhandara</div>
+            <div class="title">Booking Confirmation</div>
+          </div>
+          <div class="details">
+            <div class="row">
+              <div class="label">Booking ID:</div>
+              <div class="value">${bookingDetails.bookingId}</div>
+            </div>
+            <div class="row">
+              <div class="label">Customer Name:</div>
+              <div class="value">${bookingDetails.userName}</div>
+            </div>
+            <div class="row">
+              <div class="label">Email:</div>
+              <div class="value">${bookingDetails.userEmail}</div>
+            </div>
+            <div class="row">
+              <div class="label">Phone:</div>
+              <div class="value">${bookingDetails.userPhone}</div>
+            </div>
+            <div class="row">
+              <div class="label">Warehouse:</div>
+              <div class="value">${warehouse?.name}</div>
+            </div>
+            <div class="row">
+              <div class="label">Location:</div>
+              <div class="value">${warehouse?.location}</div>
+            </div>
+            <div class="row">
+              <div class="label">Quantity:</div>
+              <div class="value">${formData.quantity} quintals</div>
+            </div>
+            <div class="row">
+              <div class="label">Duration:</div>
+              <div class="value">${formData.duration} days</div>
+            </div>
+            <div class="row">
+              <div class="label">Start Date:</div>
+              <div class="value">${formData.startDate}</div>
+            </div>
+            <div class="row">
+              <div class="label">Total Amount:</div>
+              <div class="value">₹${bookingDetails.totalAmount}</div>
+            </div>
+            <div class="row">
+              <div class="label">Booking Date:</div>
+              <div class="value">${bookingDetails.bookingDate}</div>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Thank you for choosing Raithara Bhandara for your storage needs.</p>
+            <p>For any assistance, please contact our support at support@raitharabhandara.com</p>
+          </div>
+          <script>
+            window.onload = function() { window.print(); }
+          </script>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+  };
+
+  const handleDownloadPDF = () => {
+    toast.info("PDF generation would be implemented with a library like jsPDF");
   };
 
   if (!warehouse) {
@@ -114,6 +207,24 @@ const Payment = () => {
           </p>
           <Button onClick={() => navigate('/warehouses')}>
             Browse Available Warehouses
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <AlertCircle className="mx-auto text-yellow-500 mb-4" size={64} />
+          <h1 className="text-4xl font-display font-bold text-primary mb-4">Authentication Required</h1>
+          <p className="text-lg text-foreground/80 mb-8">
+            Please log in to continue with your booking.
+          </p>
+          <Button onClick={() => navigate('/login', { state: { returnUrl: `/payment/${warehouseId}` } })}>
+            Log In
           </Button>
         </div>
       </div>
@@ -139,9 +250,29 @@ const Payment = () => {
                 Thank you for booking with Raithara Bhandara. Your storage space is confirmed at {warehouse.name}.
               </p>
               
-              <div className="border border-gray-200 rounded-lg p-6 mb-8 text-left">
+              <div ref={printRef} className="border border-gray-200 rounded-lg p-6 mb-8 text-left">
                 <h3 className="font-semibold mb-4 text-gray-700">Booking Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Booking ID</p>
+                    <p className="font-medium">{bookingDetails.bookingId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Booking Date</p>
+                    <p className="font-medium">{bookingDetails.bookingDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Customer Name</p>
+                    <p className="font-medium">{bookingDetails.userName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-medium">{bookingDetails.userEmail}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <p className="font-medium">{bookingDetails.userPhone}</p>
+                  </div>
                   <div>
                     <p className="text-sm text-gray-500">Warehouse</p>
                     <p className="font-medium">{warehouse.name}</p>
@@ -159,22 +290,27 @@ const Payment = () => {
                     <p className="font-medium">{formData.duration} days</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Total Amount</p>
-                    <p className="font-medium">₹{getTotalPrice()}</p>
+                    <p className="text-sm text-gray-500">Start Date</p>
+                    <p className="font-medium">{formData.startDate}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Booking ID</p>
-                    <p className="font-medium">RB{Math.floor(Math.random() * 10000)}</p>
+                    <p className="text-sm text-gray-500">Total Amount</p>
+                    <p className="font-medium">₹{bookingDetails.totalAmount}</p>
                   </div>
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={() => navigate('/warehouses')}>
-                  Browse More Warehouses
+                <Button onClick={handlePrint} className="flex items-center gap-2">
+                  <Printer size={16} />
+                  Print Receipt
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/')}>
-                  Return to Home
+                <Button variant="outline" onClick={handleDownloadPDF} className="flex items-center gap-2">
+                  <FileText size={16} />
+                  Download PDF
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/warehouses')}>
+                  Browse More Warehouses
                 </Button>
               </div>
             </div>
@@ -237,6 +373,33 @@ const Payment = () => {
                           onChange={handleInputChange}
                           required
                         />
+                      </div>
+
+                      <div className="border-t pt-4 mt-4">
+                        <h3 className="font-medium mb-2">Customer Information</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Name</label>
+                            <Input
+                              value={`${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`}
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Email</label>
+                            <Input
+                              value={user?.email || ''}
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Phone</label>
+                            <Input
+                              value={user?.user_metadata?.phone_number || ''}
+                              disabled
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                     

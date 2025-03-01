@@ -7,12 +7,14 @@ import { MapPin, Star, Calendar, Truck, CheckCircle, ThermometerSnowflake, Badge
 import { Card, CardContent } from '@/components/ui/card';
 import { warehousesData } from '@/data/warehousesData';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const WarehouseDetails = () => {
   const { warehouseId } = useParams();
   const navigate = useNavigate();
   const [warehouse, setWarehouse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Simulate API fetch with a small delay
@@ -31,6 +33,12 @@ const WarehouseDetails = () => {
   }, [warehouseId, navigate]);
 
   const handleBooking = () => {
+    if (!user) {
+      toast.info("Please log in to book storage");
+      navigate('/login', { state: { returnUrl: `/warehouse/${warehouseId}` } });
+      return;
+    }
+
     if (warehouse && warehouse.available) {
       navigate(`/payment/${warehouseId}`);
     } else {
@@ -179,7 +187,7 @@ const WarehouseDetails = () => {
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Book This Storage</h3>
                 <div className="mb-6">
-                  <div className="text-2xl font-bold text-primary mb-1">{warehouse.price}</div>
+                  <div className="text-2xl font-bold text-primary mb-1">{warehouse?.price}</div>
                   <div className="text-sm text-foreground/60">per quintal per day</div>
                 </div>
 
@@ -202,13 +210,13 @@ const WarehouseDetails = () => {
 
                 <Button 
                   className="w-full text-base py-6" 
-                  disabled={!warehouse.available}
+                  disabled={!warehouse?.available}
                   onClick={handleBooking}
                 >
-                  {warehouse.available ? 'Book Storage Now' : 'Currently Unavailable'}
+                  {!user ? 'Login & Book Storage' : (warehouse?.available ? 'Book Storage Now' : 'Currently Unavailable')}
                 </Button>
                 
-                {!warehouse.available && (
+                {!warehouse?.available && (
                   <p className="text-sm text-center mt-3 text-foreground/60">
                     This facility is currently fully booked. Please check back later or explore other options.
                   </p>
