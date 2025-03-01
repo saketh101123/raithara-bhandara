@@ -35,7 +35,7 @@ const WarehouseReviews = ({ warehouseId }: WarehouseReviewsProps) => {
         .from('reviews')
         .select(`
           *,
-          profiles:user_id (
+          profiles:user_id(
             first_name,
             last_name
           )

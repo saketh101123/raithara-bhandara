@@ -1,78 +1,134 @@
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { format, addDays } from 'date-fns';
+import { Calendar } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, BadgePercent } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface BookingCardProps {
-  warehouse: {
-    id: number;
-    price: string;
-    available: boolean;
-  };
+  warehousePrice: string;
+  warehouseAvailability: string;
+  onBookNow: () => void;
 }
 
-const BookingCard = ({ warehouse }: BookingCardProps) => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const handleBooking = () => {
-    if (!user) {
-      toast.info("Please log in to book storage");
-      navigate('/login', { state: { returnUrl: `/warehouse/${warehouse.id}` } });
-      return;
-    }
-
-    if (warehouse && warehouse.available) {
-      navigate(`/payment/${warehouse.id}`);
-    } else {
-      toast.error("This facility is currently unavailable for booking");
-    }
-  };
-
+const BookingCard = ({ 
+  warehousePrice, 
+  warehouseAvailability, 
+  onBookNow 
+}: BookingCardProps) => {
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [duration, setDuration] = useState<string>("30");
+  const [quantity, setQuantity] = useState<string>("10");
+  
+  const endDate = addDays(startDate, parseInt(duration));
+  
+  const totalPrice = parseInt(quantity) * parseInt(duration) * parseFloat(warehousePrice.replace(/[^0-9.]/g, ''));
+  
   return (
-    <Card className="sticky top-24">
-      <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Book This Storage</h3>
-        <div className="mb-6">
-          <div className="text-2xl font-bold text-primary mb-1">{warehouse?.price}</div>
-          <div className="text-sm text-foreground/60">per quintal per day</div>
-        </div>
-
-        <div className="space-y-4 mb-6">
-          <div className="flex items-center">
-            <Calendar className="w-5 h-5 text-primary mr-3" />
-            <div>
-              <p className="font-medium">Immediate Availability</p>
-              <p className="text-sm text-foreground/60">Book now to secure your storage</p>
-            </div>
+    <Card className="border-2 border-primary/10">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-2xl font-bold">{warehousePrice}<span className="text-sm font-normal text-muted-foreground">/ton/day</span></h3>
+            <p className="text-sm text-muted-foreground">{warehouseAvailability}</p>
           </div>
-          <div className="flex items-center">
-            <BadgePercent className="w-5 h-5 text-primary mr-3" />
-            <div>
-              <p className="font-medium">10% discount on 3+ months</p>
-              <p className="text-sm text-foreground/60">Long-term benefits available</p>
-            </div>
+          <div className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full">
+            Best Value
           </div>
         </div>
-
-        <Button 
-          className="w-full text-base py-6" 
-          disabled={!warehouse?.available}
-          onClick={handleBooking}
-        >
-          {!user ? 'Login & Book Storage' : (warehouse?.available ? 'Book Storage Now' : 'Currently Unavailable')}
-        </Button>
         
-        {!warehouse?.available && (
-          <p className="text-sm text-center mt-3 text-foreground/60">
-            This facility is currently fully booked. Please check back later or explore other options.
-          </p>
-        )}
+        <div className="space-y-4 mt-6">
+          <div>
+            <label className="text-sm font-medium mb-1 block">Start Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {format(startDate, "PPP")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <CalendarComponent
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium mb-1 block">Duration (Days)</label>
+            <Select value={duration} onValueChange={setDuration}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select duration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 days</SelectItem>
+                <SelectItem value="14">14 days</SelectItem>
+                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="60">60 days</SelectItem>
+                <SelectItem value="90">90 days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium mb-1 block">Quantity (Tons)</label>
+            <Select value={quantity} onValueChange={setQuantity}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select quantity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 tons</SelectItem>
+                <SelectItem value="10">10 tons</SelectItem>
+                <SelectItem value="20">20 tons</SelectItem>
+                <SelectItem value="50">50 tons</SelectItem>
+                <SelectItem value="100">100 tons</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="bg-muted p-3 rounded-lg">
+            <div className="flex justify-between mb-2">
+              <span>End Date</span>
+              <span>{format(endDate, "MMM dd, yyyy")}</span>
+            </div>
+            
+            <div className="flex justify-between font-medium">
+              <span>Total Price</span>
+              <span>₹{totalPrice.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
       </CardContent>
+      
+      <CardFooter>
+        <Button 
+          onClick={onBookNow} 
+          className="w-full"
+          disabled={warehouseAvailability !== 'Available Now'}
+        >
+          Book Now
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

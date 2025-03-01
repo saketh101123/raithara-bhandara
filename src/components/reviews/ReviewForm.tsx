@@ -41,13 +41,15 @@ const ReviewForm = ({ warehouseId, onReviewSubmitted }: ReviewFormProps) => {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.from('reviews').insert({
-        warehouse_id: warehouseId,
-        user_id: user.id,
-        rating,
-        comment,
-        created_at: new Date().toISOString()
-      });
+      const { error } = await supabase
+        .from('reviews')
+        .insert({
+          warehouse_id: warehouseId,
+          user_id: user.id,
+          rating,
+          comment,
+          created_at: new Date().toISOString()
+        });
       
       if (error) throw error;
       

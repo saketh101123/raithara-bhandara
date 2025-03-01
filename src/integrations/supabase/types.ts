@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          booking_date: string | null
+          duration: number
+          end_date: string
+          id: string
+          quantity: number
+          start_date: string
+          status: string
+          total_amount: number
+          user_id: string
+          warehouse_id: number
+        }
+        Insert: {
+          booking_date?: string | null
+          duration: number
+          end_date: string
+          id: string
+          quantity: number
+          start_date: string
+          status: string
+          total_amount: number
+          user_id: string
+          warehouse_id: number
+        }
+        Update: {
+          booking_date?: string | null
+          duration?: number
+          end_date?: string
+          id?: string
+          quantity?: number
+          start_date?: string
+          status?: string
+          total_amount?: number
+          user_id?: string
+          warehouse_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           first_name: string | null
@@ -32,6 +79,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: number
+          rating: number
+          updated_at: string | null
+          user_id: string
+          warehouse_id: number
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: number
+          rating: number
+          updated_at?: string | null
+          user_id: string
+          warehouse_id: number
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: number
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+          warehouse_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

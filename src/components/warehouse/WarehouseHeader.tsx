@@ -1,60 +1,61 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface WarehouseHeaderProps {
-  warehouse: {
-    name: string;
-    location: string;
-    distance: string;
-    rating: number;
-    image: string;
-    available: boolean;
-  };
+  warehouseName: string;
+  location: string;
+  rating: number;
+  reviewCount: number;
+  imageUrl: string;
 }
 
-const WarehouseHeader = ({ warehouse }: WarehouseHeaderProps) => {
+const WarehouseHeader = ({
+  warehouseName,
+  location,
+  rating,
+  reviewCount,
+  imageUrl
+}: WarehouseHeaderProps) => {
   return (
-    <>
-      <div className="mb-8">
-        <Link to="/warehouses" className="text-primary hover:underline flex items-center gap-1">
-          ← Back to Warehouses
-        </Link>
-      </div>
-
-      <div className="relative h-64 md:h-96 rounded-lg overflow-hidden mb-6">
-        <img 
-          src={warehouse.image} 
-          alt={warehouse.name}
-          className="w-full h-full object-cover"
-        />
-        {!warehouse.available && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="bg-red-500 text-white px-4 py-2 rounded-md font-medium">
-              Fully Booked
-            </span>
+    <div>
+      <div className="flex flex-col md:flex-row md:items-start mb-4 md:mb-6 gap-4">
+        <AspectRatio ratio={16/9} className="bg-muted rounded-lg overflow-hidden w-full md:w-1/3 lg:w-1/4">
+          <img
+            src={imageUrl}
+            alt={warehouseName}
+            className="object-cover w-full h-full"
+          />
+        </AspectRatio>
+        
+        <div className="flex-1">
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-primary">{warehouseName}</h1>
+          
+          <div className="mt-2 flex items-center text-sm text-muted-foreground">
+            <span>{location}</span>
           </div>
-        )}
-      </div>
-
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold text-primary">{warehouse.name}</h1>
-            <div className="flex items-center mt-2 text-foreground/70">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span>{warehouse.location} ({warehouse.distance})</span>
+          
+          <div className="mt-3 flex items-center">
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-5 w-5 ${
+                    i < rating
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-gray-300'
+                  }`}
+                />
+              ))}
             </div>
-          </div>
-          <div className="flex items-center bg-primary/5 px-4 py-2 rounded-lg">
-            <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
-            <span className="font-semibold text-lg">{warehouse.rating}</span>
-            <span className="text-foreground/60 ml-1">/5</span>
+            <span className="ml-2 text-sm text-muted-foreground">
+              {rating.toFixed(1)} ({reviewCount} reviews)
+            </span>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
