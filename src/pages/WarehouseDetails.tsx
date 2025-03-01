@@ -10,7 +10,7 @@ import BookingCard from '@/components/warehouse/BookingCard';
 import WarehouseReviews from '@/components/reviews/WarehouseReviews';
 import LoadingState from '@/components/warehouse/LoadingState';
 import NotFoundState from '@/components/warehouse/NotFoundState';
-import warehousesData from '@/data/warehousesData';
+import { warehousesData } from '@/data/warehousesData';
 import { useAuth } from '@/contexts/AuthContext';
 
 const WarehouseDetails = () => {
