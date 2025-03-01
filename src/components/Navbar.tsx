@@ -1,169 +1,169 @@
 
-import { useState } from 'react';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Menu, X, User, LogOut, Home, Package, DollarSign, Phone, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useMobile } from '@/hooks/use-mobile';
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-
+  const isMobile = useMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
 
-  const isActive = (path: string) => {
-    if (path === '/' && location.pathname !== '/') return false;
-    return location.pathname.startsWith(path);
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
   };
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navItems = [
+    { label: 'Home', path: '/', icon: <Home className="h-4 w-4 mr-2" /> },
+    { label: 'Warehouses', path: '/warehouses', icon: <Package className="h-4 w-4 mr-2" /> },
+    { label: 'Pricing', path: '/pricing', icon: <DollarSign className="h-4 w-4 mr-2" /> },
+    { label: 'Contact', path: '/contact', icon: <Phone className="h-4 w-4 mr-2" /> },
+  ];
+
+  const userNavItems = user
+    ? [
+        { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-4 w-4 mr-2" /> },
+        { label: 'Profile', path: '/profile', icon: <User className="h-4 w-4 mr-2" /> },
+        { label: 'Logout', onClick: handleLogout, icon: <LogOut className="h-4 w-4 mr-2" /> },
+      ]
+    : [
+        { label: 'Login', path: '/login', icon: <LogIn className="h-4 w-4 mr-2" /> },
+        { label: 'Register', path: '/register', icon: <UserPlus className="h-4 w-4 mr-2" /> },
+      ];
 
   return (
-    <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 shadow-sm">
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-background shadow-md' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            {location.pathname !== '/' && (
-              <Button 
-                variant="ghost" 
-                onClick={handleBack} 
-                className="mr-2"
-              >
-                Back
-              </Button>
-            )}
-            <Link to="/" className="flex items-center space-x-2">
-              <h1 className="text-xl font-display font-bold text-primary">Raithara Bhandara</h1>
-            </Link>
-          </div>
-
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="text-2xl font-display font-bold text-primary hover:opacity-80 transition-opacity">
+            Raithara Bhandara
+          </Link>
+          
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/features" className={`nav-link ${isActive('/features') ? 'text-primary' : ''}`}>
-              Features
-            </Link>
-            <Link to="/warehouses" className={`nav-link ${isActive('/warehouses') ? 'text-primary' : ''}`}>
-              Warehouses
-            </Link>
-            <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'text-primary' : ''}`}>
-              Pricing
-            </Link>
-            <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'text-primary' : ''}`}>
-              Contact
-            </Link>
+          <nav className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === item.path
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
             
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <User size={16} />
-                    Account
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate("/profile")} className="gap-2 cursor-pointer">
-                    <User size={16} />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()} className="gap-2 cursor-pointer">
-                    <LogOut size={16} />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/login" className="btn-primary">Login</Link>
+            {userNavItems.map((item, index) => 
+              item.path ? (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    location.pathname === item.path
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={item.onClick}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  {item.label}
+                </button>
+              )
             )}
-          </div>
-
+          </nav>
+          
           {/* Mobile Menu Button */}
-          <button className="md:hidden" onClick={toggleMenu}>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted transition-colors"
+            onClick={toggleMenu}
+          >
+            <span className="sr-only">Open main menu</span>
+            {isMenuOpen ? (
+              <X className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Menu className="block h-6 w-6" aria-hidden="true" />
+            )}
           </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t animate-fade-up">
-            <div className="flex flex-col space-y-4 p-4">
-              <Link 
-                to="/features" 
-                className={`nav-link ${isActive('/features') ? 'text-primary' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
+      </div>
+      
+      {/* Mobile Navigation */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-card border-t">
+          <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname === item.path
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+                onClick={closeMenu}
               >
-                Features
+                {item.icon}
+                {item.label}
               </Link>
-              <Link 
-                to="/warehouses" 
-                className={`nav-link ${isActive('/warehouses') ? 'text-primary' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Warehouses
-              </Link>
-              <Link 
-                to="/pricing" 
-                className={`nav-link ${isActive('/pricing') ? 'text-primary' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link 
-                to="/contact" 
-                className={`nav-link ${isActive('/contact') ? 'text-primary' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              
-              {user ? (
-                <>
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 w-full justify-start"
-                    onClick={() => {
-                      navigate("/profile");
-                      setIsMenuOpen(false);
-                    }}
+            ))}
+            
+            <div className="pt-4 border-t border-border">
+              {userNavItems.map((item, index) => 
+                item.path ? (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted"
+                    onClick={closeMenu}
                   >
-                    <User size={16} />
-                    Profile
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 w-full justify-start"
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
                     onClick={() => {
-                      signOut();
-                      setIsMenuOpen(false);
+                      closeMenu();
+                      item.onClick?.();
                     }}
+                    className="flex items-center w-full text-left px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted"
                   >
-                    <LogOut size={16} />
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <Link 
-                  to="/login" 
-                  className="btn-primary w-full text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login
-                </Link>
+                    {item.icon}
+                    {item.label}
+                  </button>
+                )
               )}
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+        </div>
+      )}
+    </header>
   );
 };
 

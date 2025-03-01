@@ -2,41 +2,47 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import { warehousesData } from '@/data/warehousesData';
+import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { warehousesData } from '@/data/warehousesData';
 
-// Import the newly created components
 import WarehouseHeader from '@/components/warehouse/WarehouseHeader';
-import WarehouseFeatures from '@/components/warehouse/WarehouseFeatures';
-import WarehouseDetailsComponent from '@/components/warehouse/WarehouseDetails';
 import WarehouseDescription from '@/components/warehouse/WarehouseDescription';
+import WarehouseFeatures from '@/components/warehouse/WarehouseFeatures';
 import BookingCard from '@/components/warehouse/BookingCard';
 import LoadingState from '@/components/warehouse/LoadingState';
 import NotFoundState from '@/components/warehouse/NotFoundState';
+import WarehouseReviews from '@/components/reviews/WarehouseReviews';
 
 const WarehouseDetails = () => {
-  const { warehouseId } = useParams();
+  const { warehouseId } = useParams<{ warehouseId: string }>();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [warehouse, setWarehouse] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Simulate loading
   useEffect(() => {
-    // Simulate API fetch with a small delay
     const timer = setTimeout(() => {
-      const selectedWarehouse = warehousesData.find(w => w.id === Number(warehouseId));
-      setWarehouse(selectedWarehouse);
-      setLoading(false);
-      
-      if (!selectedWarehouse) {
-        toast.error("Warehouse not found");
-        navigate('/warehouses');
-      }
-    }, 300);
+      setIsLoading(false);
+    }, 1000);
     
     return () => clearTimeout(timer);
-  }, [warehouseId, navigate]);
+  }, []);
 
-  if (loading) {
+  const warehouse = warehousesData.find(w => w.id === Number(warehouseId));
+
+  const handleBookNow = () => {
+    if (!user) {
+      toast.error("Please log in to book storage");
+      navigate('/login', { state: { returnUrl: `/warehouse/${warehouseId}` } });
+      return;
+    }
+    
+    navigate(`/payment/${warehouseId}`);
+  };
+
+  if (isLoading) {
     return <LoadingState />;
   }
 
@@ -47,24 +53,38 @@ const WarehouseDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-24">
-        <WarehouseHeader warehouse={warehouse} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <main className="container mx-auto px-4 py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <WarehouseFeatures features={warehouse.features} />
-              <WarehouseDetailsComponent warehouse={warehouse} />
-            </div>
-
-            <WarehouseDescription />
+            <WarehouseHeader 
+              name={warehouse.name} 
+              location={warehouse.location} 
+              rating={warehouse.rating} 
+              reviewCount={warehouse.reviewCount} 
+              imageUrl={warehouse.imageUrl} 
+            />
+            
+            <WarehouseDescription description={warehouse.description} />
+            
+            <WarehouseFeatures features={warehouse.features} />
+            
+            <WarehouseReviews warehouseId={warehouse.id} />
           </div>
-
+          
           <div className="lg:col-span-1">
-            <BookingCard warehouse={warehouse} />
+            <div className="sticky top-24">
+              <BookingCard 
+                price={warehouse.price} 
+                availability={warehouse.availability} 
+                onBookNow={handleBookNow} 
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
