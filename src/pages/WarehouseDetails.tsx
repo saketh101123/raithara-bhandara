@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -12,6 +11,7 @@ import LoadingState from '@/components/warehouse/LoadingState';
 import NotFoundState from '@/components/warehouse/NotFoundState';
 import { warehousesData } from '@/data/warehousesData';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const WarehouseDetails = () => {
   const { warehouseId } = useParams<{ warehouseId: string }>();
