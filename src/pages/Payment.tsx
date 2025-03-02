@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { warehousesData } from '@/data/warehousesData';
@@ -13,6 +13,7 @@ import ErrorState from '@/components/payment/ErrorState';
 import PaymentForm from '@/components/payment/PaymentForm';
 import BookingSummary from '@/components/payment/BookingSummary';
 import BookingConfirmation from '@/components/payment/BookingConfirmation';
+import { Button } from '@/components/ui/button';
 
 const Payment = () => {
   const { warehouseId } = useParams<{ warehouseId: string }>();
@@ -200,6 +201,10 @@ const Payment = () => {
     toast.info("PDF generation would be implemented with a library like jsPDF");
   };
 
+  const handleGoBack = () => {
+    navigate(`/warehouse/${warehouseId}`);
+  };
+
   if (!warehouse) {
     return (
       <ErrorState 
@@ -226,45 +231,74 @@ const Payment = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-24">
-        <PaymentHeader isBookingComplete={bookingComplete} />
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        <Button 
+          variant="outline" 
+          className="mb-6 flex items-center" 
+          onClick={handleGoBack}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Warehouse
+        </Button>
 
-        {bookingComplete ? (
-          <BookingConfirmation 
-            bookingDetails={bookingDetails}
-            warehouseName={warehouse.name}
-            warehouseLocation={warehouse.location}
-            quantity={formData.quantity}
-            duration={formData.duration}
-            startDate={formData.startDate}
-            printRef={printRef}
-            handlePrint={handlePrint}
-            handleDownloadPDF={handleDownloadPDF}
-          />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
-            <div className="lg:col-span-3">
-              <PaymentForm 
-                formData={formData}
-                handleInputChange={handleInputChange}
-                handlePaymentMethodChange={handlePaymentMethodChange}
-                handleSubmit={handleSubmit}
-                isProcessing={isProcessing}
-                getTotalPrice={getTotalPrice}
-                user={user}
-              />
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+          <PaymentHeader isBookingComplete={bookingComplete} />
+          
+          {!bookingComplete && (
+            <div className="mb-6">
+              <div className="flex items-center mb-4">
+                <img 
+                  src={warehouse.image} 
+                  alt={warehouse.name} 
+                  className="w-16 h-16 object-cover rounded-md mr-4"
+                />
+                <div>
+                  <h3 className="font-medium text-lg">{warehouse.name}</h3>
+                  <p className="text-muted-foreground">{warehouse.location}</p>
+                </div>
+              </div>
+              <div className="bg-primary/5 rounded-lg p-3 inline-block text-sm">
+                <span className="font-medium">Base Price:</span> {warehouse.price} per quintal per day
+              </div>
             </div>
-            
-            <div className="lg:col-span-2">
-              <BookingSummary 
-                warehouse={warehouse}
-                quantity={formData.quantity}
-                duration={formData.duration}
-                getTotalPrice={getTotalPrice}
-              />
+          )}
+
+          {bookingComplete ? (
+            <BookingConfirmation 
+              bookingDetails={bookingDetails}
+              warehouseName={warehouse.name}
+              warehouseLocation={warehouse.location}
+              quantity={formData.quantity}
+              duration={formData.duration}
+              startDate={formData.startDate}
+              printRef={printRef}
+              handlePrint={handlePrint}
+              handleDownloadPDF={handleDownloadPDF}
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 order-2 lg:order-1">
+                <PaymentForm 
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  handlePaymentMethodChange={handlePaymentMethodChange}
+                  handleSubmit={handleSubmit}
+                  isProcessing={isProcessing}
+                  getTotalPrice={getTotalPrice}
+                  user={user}
+                />
+              </div>
+              
+              <div className="lg:col-span-1 order-1 lg:order-2">
+                <BookingSummary 
+                  warehouse={warehouse}
+                  quantity={formData.quantity}
+                  duration={formData.duration}
+                  getTotalPrice={getTotalPrice}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
