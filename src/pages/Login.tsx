@@ -24,8 +24,12 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await signIn(email, password);
-    // The navigation will be handled by the useEffect after successful login
+    try {
+      await signIn(email, password);
+      // The navigation will be handled by the useEffect after successful login
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   return (

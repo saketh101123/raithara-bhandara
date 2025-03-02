@@ -44,6 +44,7 @@ const WarehouseDetails = () => {
   const handleBookNow = () => {
     if (!user) {
       toast.error("Please log in to book a storage unit");
+      // Pass the current URL as the return URL
       navigate('/login', { state: { returnUrl: `/warehouse/${warehouseId}` } });
       return;
     }
