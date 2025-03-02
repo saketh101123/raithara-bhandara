@@ -69,6 +69,7 @@ const Dashboard = () => {
     setLoading(true);
     
     try {
+      // Updated query to properly join with the warehouses table
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -81,12 +82,14 @@ const Dashboard = () => {
           status,
           total_amount,
           booking_date,
-          warehouses:warehouse_id (name, location)
+          warehouses (name, location)
         `)
         .eq('user_id', user.id)
         .order('booking_date', { ascending: false });
       
       if (error) throw error;
+      
+      console.log("Bookings data from Supabase:", data);
       
       // Format the data to match our Booking interface
       const formattedBookings: Booking[] = (data || []).map((booking: any) => ({
@@ -108,6 +111,7 @@ const Dashboard = () => {
         }
       }));
       
+      console.log("Formatted bookings:", formattedBookings);
       setBookings(formattedBookings);
       setFilteredBookings(formattedBookings);
     } catch (error: any) {

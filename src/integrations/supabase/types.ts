@@ -118,6 +118,36 @@ export type Database = {
           },
         ]
       }
+      warehouses: {
+        Row: {
+          available: boolean | null
+          created_at: string | null
+          description: string | null
+          id: number
+          location: string
+          name: string
+          price: number
+        }
+        Insert: {
+          available?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id: number
+          location: string
+          name: string
+          price: number
+        }
+        Update: {
+          available?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          location?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
