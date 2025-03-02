@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -43,11 +44,12 @@ const WarehouseDetails = () => {
   const handleBookNow = () => {
     if (!user) {
       toast.error("Please log in to book a storage unit");
-      navigate('/login', { state: { returnUrl: `/warehouses/${warehouseId}` } });
+      navigate('/login', { state: { returnUrl: `/warehouse/${warehouseId}` } });
       return;
     }
     
-    navigate(`/payment?warehouseId=${warehouseId}`);
+    // Fixed route to match the route defined in App.tsx
+    navigate(`/payment/${warehouseId}`);
   };
 
   if (isLoading) {
