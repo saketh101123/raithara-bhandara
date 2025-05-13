@@ -26,7 +26,7 @@ const Login = () => {
     e.preventDefault();
     try {
       await signIn(email, password);
-      // The navigation will be handled by the useEffect after successful login
+      // Navigation will be handled by the useEffect after successful login
     } catch (error) {
       console.error("Login error:", error);
     }

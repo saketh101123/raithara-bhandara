@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { warehousesData } from '@/data/warehousesData';
 
-// Import the newly created components
+// Import the components
 import PaymentHeader from '@/components/payment/PaymentHeader';
 import ErrorState from '@/components/payment/ErrorState';
 import PaymentForm from '@/components/payment/PaymentForm';
@@ -20,6 +20,7 @@ const Payment = () => {
   const navigate = useNavigate();
   const { user, session } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   
   const warehouse = warehousesData.find(w => w.id === Number(warehouseId));
   
@@ -47,11 +48,15 @@ const Payment = () => {
   });
 
   useEffect(() => {
-    if (!user) {
-      toast.error("Please log in to book storage");
-      navigate('/login', { state: { returnUrl: `/payment/${warehouseId}` } });
+    // Check authentication status only once
+    if (!authChecked) {
+      if (!user) {
+        toast.error("Please log in to book storage");
+        navigate('/login', { state: { returnUrl: `/payment/${warehouseId}` } });
+      }
+      setAuthChecked(true);
     }
-  }, [user, navigate, warehouseId]);
+  }, [user, authChecked, navigate, warehouseId]);
   
   useEffect(() => {
     const today = new Date();
@@ -217,7 +222,9 @@ const Payment = () => {
     );
   }
 
-  if (!user) {
+  // Don't show the auth error state if we're still checking authentication
+  // This prevents a flash of the error state during the auth check
+  if (!user && authChecked) {
     return (
       <ErrorState 
         title="Authentication Required"
@@ -226,6 +233,11 @@ const Payment = () => {
         buttonUrl="/login"
       />
     );
+  }
+
+  // Wait until we've checked auth before rendering the main component
+  if (!authChecked) {
+    return null; // Or a loading spinner
   }
 
   return (
