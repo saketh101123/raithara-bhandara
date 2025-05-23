@@ -80,7 +80,7 @@ const BookingConfirmation = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Quantity</p>
-              <p className="font-medium">{quantity} quintals</p>
+              <p className="font-medium">{quantity} metric tons</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Duration</p>

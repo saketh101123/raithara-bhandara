@@ -49,7 +49,7 @@ const BookingSummary = ({ warehouse, quantity, duration, getTotalPrice }: Bookin
               <Package className="w-4 h-4 mr-2 text-primary" />
               Quantity
             </span>
-            <span className="font-medium">{quantity} quintals</span>
+            <span className="font-medium">{quantity} metric tons</span>
           </div>
           <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
             <span className="text-foreground/70 flex items-center">

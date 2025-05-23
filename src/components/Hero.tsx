@@ -35,20 +35,28 @@ const Hero = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 animate-fade-up" 
                style={{ animationDelay: '0.6s' }}>
             <div className="stats-card">
-              <h3 className="text-3xl font-bold text-primary">1000+</h3>
+              <h3 className="text-3xl font-bold text-primary">237</h3>
               <p className="text-sm text-foreground/60">Storage Facilities</p>
             </div>
             <div className="stats-card">
-              <h3 className="text-3xl font-bold text-primary">50K+</h3>
-              <p className="text-sm text-foreground/60">Farmers Served</p>
+              <h3 className="text-3xl font-bold text-primary">6,76,832</h3>
+              <p className="text-sm text-foreground/60">Total Storage Capacity (MT)</p>
             </div>
             <div className="stats-card">
               <h3 className="text-3xl font-bold text-primary">40%</h3>
-              <p className="text-sm text-foreground/60">Waste Reduction</p>
+              <p className="text-sm text-foreground/60">Potential Waste Reduction</p>
             </div>
             <div className="stats-card">
               <h3 className="text-3xl font-bold text-primary">₹100Cr+</h3>
-              <p className="text-sm text-foreground/60">Saved Annually</p>
+              <p className="text-sm text-foreground/60">Potential Annual Savings</p>
+            </div>
+          </div>
+
+          {/* Added new stats card for farmers benefited */}
+          <div className="mt-8 animate-fade-up" style={{ animationDelay: '0.7s' }}>
+            <div className="stats-card inline-block mx-auto">
+              <h3 className="text-3xl font-bold text-primary">Tens of thousands</h3>
+              <p className="text-sm text-foreground/60">Farmers Benefited</p>
             </div>
           </div>
         </div>
