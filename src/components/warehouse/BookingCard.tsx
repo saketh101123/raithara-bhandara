@@ -14,11 +14,6 @@ const BookingCard = ({
   warehouseAvailability, 
   onBookNow 
 }: BookingCardProps) => {
-  // Check if the price already includes the '/quintal/day' text
-  const displayPrice = warehousePrice.includes('/quintal/day') 
-    ? warehousePrice 
-    : `${warehousePrice}/quintal/day`;
-
   return (
     <Card className="border-2 border-primary/10">
       <CardContent className="pt-6">

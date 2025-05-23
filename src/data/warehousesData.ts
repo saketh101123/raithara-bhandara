@@ -8,7 +8,7 @@ export const warehousesData = [
     capacity: '5000 MT',
     price: '₹35/quintal/day',
     distance: '12 km',
-    image: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/8eaf55a2-72f8-4628-a7ce-3cabd024f2d7.png',
     available: true,
     features: ['Temperature Control', 'Humidity Control', '24/7 Security', 'Loading Dock']
   },
@@ -20,7 +20,7 @@ export const warehousesData = [
     capacity: '3000 MT',
     price: '₹32/quintal/day',
     distance: '45 km',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/171ac39c-990c-44b4-92cb-1d8e694c2679.png',
     available: true,
     features: ['Temperature Control', 'Pest Control', 'Power Backup', 'Quality Testing']
   },
@@ -32,7 +32,7 @@ export const warehousesData = [
     capacity: '4000 MT',
     price: '₹30/quintal/day',
     distance: '80 km',
-    image: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/304c5e42-7528-4093-b938-b079280e9a2b.png',
     available: true,
     features: ['Temperature Control', 'Humidity Control', 'Transport Service', 'Market Linkage']
   },
@@ -44,7 +44,7 @@ export const warehousesData = [
     capacity: '2000 MT',
     price: '₹28/quintal/day',
     distance: '35 km',
-    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/e673a140-973c-4601-9768-33e696383838.png',
     available: true,
     features: ['Temperature Control', 'Sorting Facility', 'Packaging', 'Internet Connectivity']
   },
@@ -56,20 +56,21 @@ export const warehousesData = [
     capacity: '3500 MT',
     price: '₹31/quintal/day',
     distance: '65 km',
-    image: 'https://images.unsplash.com/photo-1512467627024-7a5e9c576d24?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/25625be3-3b04-4276-8b33-e7e0dbecdc85.png',
     available: false,
     features: ['Temperature Control', 'Humidity Control', 'Grading', 'Insurance Coverage']
   },
   {
     id: 6,
-    name: 'Kolar Gold Storage',
+    name: 'Kolar Cold Storage',
     location: 'Kolar',
     rating: 4.8,
     capacity: '2500 MT',
     price: '₹33/quintal/day',
     distance: '50 km',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80',
+    image: '/lovable-uploads/8eaf55a2-72f8-4628-a7ce-3cabd024f2d7.png',
     available: true,
     features: ['Temperature Control', 'Quality Certification', 'Export Facility', 'Loan Against Storage']
   }
 ];
+
