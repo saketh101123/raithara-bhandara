@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -25,7 +24,7 @@ const Payment = () => {
   const warehouse = warehousesData.find(w => w.id === Number(warehouseId));
   
   const [formData, setFormData] = useState({
-    quantity: '10', // in quintals
+    quantity: '10', // in metric tons
     duration: '7', // in days
     startDate: '',
     cardNumber: '',
@@ -169,7 +168,7 @@ const Payment = () => {
             </div>
             <div class="row">
               <div class="label">Quantity:</div>
-              <div class="value">${formData.quantity} quintals</div>
+              <div class="value">${formData.quantity} metric tons</div>
             </div>
             <div class="row">
               <div class="label">Duration:</div>
@@ -269,7 +268,7 @@ const Payment = () => {
                 </div>
               </div>
               <div className="bg-primary/5 rounded-lg p-3 inline-block text-sm">
-                <span className="font-medium">Base Price:</span> {warehouse.price} per quintal per day
+                <span className="font-medium">Base Price:</span> {warehouse.price}
               </div>
             </div>
           )}

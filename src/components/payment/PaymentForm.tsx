@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,7 +50,7 @@ const PaymentForm = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-muted/20 p-4 rounded-md">
                 <label htmlFor="quantity" className="block text-sm font-medium mb-2 text-foreground/80">
-                  Quantity (quintals)
+                  Quantity (metric tons)
                 </label>
                 <Input
                   id="quantity"
