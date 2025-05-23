@@ -116,7 +116,7 @@ const Warehouses = () => {
                   
                   <div className="flex items-center text-sm text-foreground/70 mb-2">
                     <MapPin className="w-4 h-4 mr-1" />
-                    <span>{warehouse.location} ({warehouse.distance})</span>
+                    <span>{warehouse.location} ({warehouse.distance} from Bangalore)</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-foreground/70 mb-4">
