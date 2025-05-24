@@ -33,7 +33,7 @@ const Navbar = () => {
   const navItems = [
     { label: 'Home', path: '/', icon: <Home className="h-4 w-4 mr-2" /> },
     { label: 'Warehouses', path: '/warehouses', icon: <Package className="h-4 w-4 mr-2" /> },
-    { label: 'Pricing', path: '/pricing', icon: <DollarSign className="h-4 w-4 mr-2" /> },
+    { label: 'Logistics', path: '/pricing', icon: <DollarSign className="h-4 w-4 mr-2" /> },
     { label: 'Contact', path: '/contact', icon: <Phone className="h-4 w-4 mr-2" /> },
   ];
 
