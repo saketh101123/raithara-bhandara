@@ -4,85 +4,98 @@ import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-const pricingPlans = [
+const logisticsPlan = [
   {
-    name: 'Basic Storage',
-    price: '₹30',
-    unit: 'per quintal/day',
-    description: 'Essential storage for small farmers with basic needs',
+    name: 'Basic Logistics',
+    price: '₹299',
+    unit: 'per month',
+    description: 'Essential transport for local cold storage needs',
     features: [
-      'Temperature controlled storage',
-      'Basic security measures',
-      'Monthly quality checks',
-      'Standard loading/unloading',
-      'Basic inventory tracking',
+      'Pickup from farm to nearest cold storage (within 20 km)',
+      'Shared vehicle transport (may be combined with others\' loads)',
+      'Scheduled pickups (within 24 hours)',
+      'Basic support (chat/email)',
     ],
     notIncluded: [
-      'Advanced monitoring system',
-      'Transportation services',
-      'Market linkage support',
-      'Insurance coverage',
+      'Dedicated vehicle',
+      'Real-time tracking',
+      'Cold chain transport',
+      'State-wide coverage',
+      'Priority scheduling',
     ],
     highlight: false,
+    icon: '🥉',
+    planId: 'basic-logistics',
   },
   {
-    name: 'Premium Storage',
-    price: '₹45',
-    unit: 'per quintal/day',
-    description: 'Enhanced storage with advanced monitoring and support',
+    name: 'Standard Logistics',
+    price: '₹699',
+    unit: 'per month',
+    description: 'Enhanced transport with dedicated vehicles and tracking',
     features: [
-      'Precision temperature & humidity control',
-      '24/7 advanced security system',
-      'Weekly quality assessments',
-      'Priority loading/unloading',
-      'Real-time inventory monitoring',
-      'Basic transportation services',
-      'Market price notifications',
-      'Basic insurance coverage',
+      'Pickup from farm to any cold storage within 50 km',
+      'Dedicated vehicle for your crops',
+      'Real-time vehicle tracking',
+      'Priority scheduling (same-day pickups)',
+      'Phone & WhatsApp support',
     ],
     notIncluded: [
-      'Premium market linkage',
-      'Export facilitation',
+      'State-wide coverage',
+      'Cold chain transport',
+      'Multiple delivery locations',
+      'Dedicated logistics manager',
     ],
     highlight: true,
+    icon: '🥈',
+    planId: 'standard-logistics',
   },
   {
-    name: 'Enterprise',
-    price: '₹60',
-    unit: 'per quintal/day',
-    description: 'Complete solution for large scale agricultural businesses',
+    name: 'Advanced Logistics',
+    price: '₹999',
+    unit: 'per month',
+    description: 'Complete logistics solution with premium features',
     features: [
-      'Custom temperature & humidity profiles',
-      'Premium security with dedicated personnel',
-      'Daily quality assessments & certification',
-      'Express loading/unloading service',
-      'Advanced inventory management system',
-      'Comprehensive transportation network',
-      'Direct market linkage & negotiations',
-      'Full insurance coverage',
-      'Export facilitation & documentation',
-      'Financing options available',
+      'State-wide transport coverage (anywhere in Karnataka)',
+      'Cold chain transport (temperature-controlled vehicles)',
+      'Delivery to multiple cold storages in one trip',
+      'Route optimization for faster delivery',
+      'Dedicated logistics manager',
+      'Early morning/late-night slot booking',
     ],
     notIncluded: [],
     highlight: false,
+    icon: '🥇',
+    planId: 'advanced-logistics',
   },
 ];
 
 const Pricing = () => {
+  const handleBookPlan = (planId: string, planName: string, price: string) => {
+    // Store plan details in localStorage for the payment page
+    localStorage.setItem('selectedLogisticsPlan', JSON.stringify({
+      planId,
+      planName,
+      price,
+      type: 'logistics'
+    }));
+    // Navigate to logistics payment page
+    window.location.href = `/payment/logistics/${planId}`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <h1 className="text-4xl font-display font-bold text-primary mb-4">Flexible Pricing Plans</h1>
+          <h1 className="text-4xl font-display font-bold text-primary mb-4">Logistics & Transport Plans</h1>
           <p className="text-lg text-foreground/80">
-            Choose the perfect storage solution that fits your needs and budget.
-            All plans include our core IoT-enabled monitoring technology.
+            Choose the perfect logistics solution for seamless farm-to-storage transport.
+            All plans include insurance coverage and 24/7 customer support.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {pricingPlans.map((plan, index) => (
+          {logisticsPlan.map((plan, index) => (
             <div 
               key={index} 
               className={`rounded-xl overflow-hidden border ${
@@ -97,21 +110,23 @@ const Pricing = () => {
                 </div>
               )}
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+                <div className="flex items-center mb-4">
+                  <span className="text-2xl mr-2">{plan.icon}</span>
+                  <h3 className="text-xl font-semibold">{plan.name}</h3>
+                </div>
                 <div className="mb-4">
                   <span className="text-3xl font-bold">{plan.price}</span>
                   <span className="text-foreground/70 ml-1">{plan.unit}</span>
                 </div>
                 <p className="text-foreground/70 mb-6">{plan.description}</p>
                 
-                <Link to="/contact" className="block w-full mb-6">
-                  <Button 
-                    className={`w-full ${!plan.highlight ? 'bg-primary/90 hover:bg-primary' : ''}`} 
-                    variant={plan.highlight ? 'default' : 'outline'}
-                  >
-                    Get Started
-                  </Button>
-                </Link>
+                <Button 
+                  className={`w-full mb-6 ${!plan.highlight ? 'bg-primary/90 hover:bg-primary' : ''}`} 
+                  variant={plan.highlight ? 'default' : 'outline'}
+                  onClick={() => handleBookPlan(plan.planId, plan.name, plan.price)}
+                >
+                  Book This Plan
+                </Button>
 
                 <div className="space-y-4">
                   <p className="font-medium">Included features:</p>
@@ -144,14 +159,14 @@ const Pricing = () => {
         </div>
 
         <div className="max-w-4xl mx-auto mt-16 p-8 bg-green-50 rounded-xl">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Need a custom solution?</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-center">Need a custom logistics solution?</h2>
           <p className="text-center mb-6">
-            We offer tailored storage solutions for specific crop types, volumes, and durations.
-            Contact our team to discuss your requirements.
+            We offer tailored transport solutions for specific crops, volumes, and routes.
+            Contact our logistics team to discuss your requirements.
           </p>
           <div className="flex justify-center">
             <Link to="/contact">
-              <Button variant="outline">Contact Sales</Button>
+              <Button variant="outline">Contact Logistics Team</Button>
             </Link>
           </div>
         </div>
@@ -162,22 +177,22 @@ const Pricing = () => {
           <div className="space-y-6">
             <div>
               <h3 className="font-medium mb-2">Can I change plans later?</h3>
-              <p className="text-foreground/70">Yes, you can upgrade or downgrade your plan at any time based on your storage needs.</p>
+              <p className="text-foreground/70">Yes, you can upgrade or downgrade your logistics plan at any time based on your transport needs.</p>
             </div>
             
             <div>
-              <h3 className="font-medium mb-2">Is there a minimum storage duration?</h3>
-              <p className="text-foreground/70">Our minimum storage duration is 7 days for all plans.</p>
+              <h3 className="font-medium mb-2">What areas do you cover?</h3>
+              <p className="text-foreground/70">Basic covers 20km radius, Standard covers 50km radius, and Advanced covers the entire state of Karnataka.</p>
             </div>
             
             <div>
-              <h3 className="font-medium mb-2">How is the storage capacity calculated?</h3>
-              <p className="text-foreground/70">Storage is calculated by weight (quintal) and billed on a daily basis.</p>
+              <h3 className="font-medium mb-2">How do I schedule a pickup?</h3>
+              <p className="text-foreground/70">You can schedule pickups through our app, website, or by calling our support team.</p>
             </div>
             
             <div>
               <h3 className="font-medium mb-2">What payment methods do you accept?</h3>
-              <p className="text-foreground/70">We accept UPI, credit/debit cards, net banking, and cash at select locations.</p>
+              <p className="text-foreground/70">We accept UPI, credit/debit cards, net banking, and monthly invoicing for business customers.</p>
             </div>
           </div>
         </div>
