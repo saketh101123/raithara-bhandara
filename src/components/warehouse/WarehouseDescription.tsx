@@ -36,7 +36,6 @@ const WarehouseDescription = () => {
             </div>
             <div>
               <h4 className="text-sm font-medium">Modern Infrastructure</h4>
-              <p className="text-sm text-muted-foreground">Built with eco-friendly materials and energy-efficient systems</p>
             </div>
           </div>
           
