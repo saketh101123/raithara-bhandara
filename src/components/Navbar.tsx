@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Home, Package, DollarSign, Phone, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Package, DollarSign, Phone, LogIn, UserPlus, History } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -39,7 +39,7 @@ const Navbar = () => {
 
   const userNavItems = user
     ? [
-        { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-4 w-4 mr-2" /> },
+        { label: 'History', path: '/dashboard', icon: <History className="h-4 w-4 mr-2" /> },
         { label: 'Profile', path: '/profile', icon: <User className="h-4 w-4 mr-2" /> },
         { label: 'Logout', onClick: handleLogout, icon: <LogOut className="h-4 w-4 mr-2" /> },
       ]

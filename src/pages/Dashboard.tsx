@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
@@ -207,7 +206,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-display font-bold text-primary">My Bookings</h1>
+            <h1 className="text-4xl font-display font-bold text-primary">Booking History</h1>
             
             {bookings.length === 0 && !loading && (
               <button 
