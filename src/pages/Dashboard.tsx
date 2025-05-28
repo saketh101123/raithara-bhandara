@@ -38,6 +38,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
@@ -54,6 +55,10 @@ const Dashboard = () => {
     }
     
     fetchBookings();
+    
+    // Trigger entrance animation
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
   }, [user, navigate]);
 
   useEffect(() => {
@@ -205,13 +210,17 @@ const Dashboard = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-display font-bold text-primary">Booking History</h1>
+          <div className={`flex justify-between items-center mb-8 transition-all duration-700 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <h1 className="text-4xl font-display font-bold text-primary animate-slide-up">
+              Booking History
+            </h1>
             
             {bookings.length === 0 && !loading && (
               <button 
                 onClick={generateMockBookings} 
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-sm text-muted-foreground hover:text-foreground transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5"
               >
                 Generate Demo Data
               </button>
@@ -219,58 +228,80 @@ const Dashboard = () => {
           </div>
           
           {bookings.length > 0 && (
-            <BookingFilters
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              dateRangeFilter={dateRangeFilter}
-              onDateRangeFilterChange={setDateRangeFilter}
-              onResetFilters={handleResetFilters}
-            />
+            <div className={`transition-all duration-700 ease-out delay-200 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              <BookingFilters
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+                dateRangeFilter={dateRangeFilter}
+                onDateRangeFilterChange={setDateRangeFilter}
+                onResetFilters={handleResetFilters}
+              />
+            </div>
           )}
           
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
+                <div 
+                  key={i} 
+                  className="h-64 bg-gray-100 animate-pulse rounded-lg loading-shimmer"
+                  style={{ animationDelay: `${i * 200}ms` }}
+                ></div>
               ))}
             </div>
           ) : filteredBookings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBookings.map((booking) => (
-                <BookingCard
+              {filteredBookings.map((booking, index) => (
+                <div
                   key={booking.id}
-                  id={booking.id}
-                  warehouseName={booking.warehouse_name}
-                  location={booking.location}
-                  startDate={booking.start_date}
-                  endDate={booking.end_date}
-                  quantity={booking.quantity}
-                  status={booking.status}
-                  totalAmount={booking.total_amount}
-                  onViewDetails={handleViewDetails}
-                />
+                  className={`transition-all duration-700 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ 
+                    transitionDelay: `${400 + (index * 100)}ms`,
+                    animationDelay: `${400 + (index * 100)}ms`
+                  }}
+                >
+                  <div className="card-hover">
+                    <BookingCard
+                      id={booking.id}
+                      warehouseName={booking.warehouse_name}
+                      location={booking.location}
+                      startDate={booking.start_date}
+                      endDate={booking.end_date}
+                      quantity={booking.quantity}
+                      status={booking.status}
+                      totalAmount={booking.total_amount}
+                      onViewDetails={handleViewDetails}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-20">
+            <div className={`text-center py-20 transition-all duration-700 ease-out delay-300 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
               {bookings.length > 0 ? (
-                <div>
+                <div className="animate-fade-scale">
                   <h3 className="text-lg font-medium mb-2">No bookings match your filters</h3>
                   <p className="text-muted-foreground mb-4">Try changing your filter criteria</p>
                   <button 
                     onClick={handleResetFilters} 
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline transition-all duration-300 ease-out transform hover:scale-105"
                   >
                     Reset Filters
                   </button>
                 </div>
               ) : (
-                <div>
+                <div className="animate-fade-scale">
                   <h3 className="text-lg font-medium mb-2">You haven't made any bookings yet</h3>
                   <p className="text-muted-foreground mb-4">Once you book a storage unit, it will appear here</p>
                   <button 
                     onClick={() => navigate('/warehouses')} 
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                    className="btn-animated inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg"
                   >
                     Browse Warehouses
                   </button>

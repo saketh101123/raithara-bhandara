@@ -49,24 +49,32 @@ const Navbar = () => {
       ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-background shadow-md' : 'bg-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ease-out ${
+      isScrolled 
+        ? 'bg-background/95 backdrop-blur-sm shadow-lg shadow-primary/5 transform' 
+        : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-display font-bold text-primary hover:opacity-80 transition-opacity">
+          <Link 
+            to="/" 
+            className="text-2xl font-display font-bold text-primary hover:opacity-80 transition-all duration-300 ease-out transform hover:scale-105"
+          >
             Raithara Bhandara
           </Link>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 ${
                   location.pathname === item.path
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'text-foreground hover:bg-muted hover:shadow-md'
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 {item.label}
               </Link>
@@ -77,11 +85,12 @@ const Navbar = () => {
                 <Link
                   key={item.label}
                   to={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 ${
                     location.pathname === item.path
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-foreground hover:bg-muted hover:shadow-md'
                   }`}
+                  style={{ animationDelay: `${(navItems.length + index) * 100}ms` }}
                 >
                   {item.label}
                 </Link>
@@ -89,7 +98,8 @@ const Navbar = () => {
                 <button
                   key={item.label}
                   onClick={item.onClick}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-md"
+                  style={{ animationDelay: `${(navItems.length + index) * 100}ms` }}
                 >
                   {item.label}
                 </button>
@@ -100,49 +110,74 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted transition-colors"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-110 hover:rotate-3"
             onClick={toggleMenu}
           >
             <span className="sr-only">Open main menu</span>
-            {isMenuOpen ? (
-              <X className="block h-6 w-6" aria-hidden="true" />
-            ) : (
-              <Menu className="block h-6 w-6" aria-hidden="true" />
-            )}
+            <div className="relative w-6 h-6">
+              <Menu 
+                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ease-out ${
+                  isMenuOpen ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
+                }`} 
+                aria-hidden="true" 
+              />
+              <X 
+                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ease-out ${
+                  isMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'
+                }`} 
+                aria-hidden="true" 
+              />
+            </div>
           </button>
         </div>
       </div>
       
       {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-card border-t">
+      <div className={`md:hidden overflow-hidden transition-all duration-500 ease-out ${
+        isMenuOpen 
+          ? 'max-h-96 opacity-100' 
+          : 'max-h-0 opacity-0'
+      }`}>
+        <div className="bg-card/95 backdrop-blur-sm border-t border-border/50 shadow-lg">
           <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 ${
                   location.pathname === item.path
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'text-foreground hover:bg-muted hover:shadow-sm'
                 }`}
                 onClick={closeMenu}
+                style={{ 
+                  animationDelay: `${index * 100}ms`,
+                  transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+                  opacity: isMenuOpen ? 1 : 0,
+                  transition: `all 0.3s ease-out ${index * 100}ms`
+                }}
               >
-                {item.icon}
+                <span className="icon-hover">{item.icon}</span>
                 {item.label}
               </Link>
             ))}
             
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border/50">
               {userNavItems.map((item, index) => 
                 item.path ? (
                   <Link
                     key={item.label}
                     to={item.path}
-                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted"
+                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 hover:shadow-sm"
                     onClick={closeMenu}
+                    style={{ 
+                      animationDelay: `${(navItems.length + index) * 100}ms`,
+                      transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+                      opacity: isMenuOpen ? 1 : 0,
+                      transition: `all 0.3s ease-out ${(navItems.length + index) * 100}ms`
+                    }}
                   >
-                    {item.icon}
+                    <span className="icon-hover">{item.icon}</span>
                     {item.label}
                   </Link>
                 ) : (
@@ -152,9 +187,15 @@ const Navbar = () => {
                       closeMenu();
                       item.onClick?.();
                     }}
-                    className="flex items-center w-full text-left px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted"
+                    className="flex items-center w-full text-left px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 hover:shadow-sm"
+                    style={{ 
+                      animationDelay: `${(navItems.length + index) * 100}ms`,
+                      transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+                      opacity: isMenuOpen ? 1 : 0,
+                      transition: `all 0.3s ease-out ${(navItems.length + index) * 100}ms`
+                    }}
                   >
-                    {item.icon}
+                    <span className="icon-hover">{item.icon}</span>
                     {item.label}
                   </button>
                 )
@@ -162,7 +203,7 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 };
