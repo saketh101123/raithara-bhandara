@@ -26,11 +26,11 @@ interface Booking {
     first_name: string;
     last_name: string;
     email: string;
-  };
+  } | null;
   warehouses?: {
     name: string;
     location: string;
-  };
+  } | null;
 }
 
 const BookingManagement = () => {
@@ -51,8 +51,8 @@ const BookingManagement = () => {
         .from("bookings")
         .select(`
           *,
-          profiles:user_id (first_name, last_name, email),
-          warehouses:warehouse_id (name, location)
+          profiles!bookings_user_id_fkey (first_name, last_name, email),
+          warehouses!bookings_warehouse_id_fkey (name, location)
         `)
         .order("booking_date", { ascending: false });
 
@@ -213,7 +213,7 @@ const BookingManagement = () => {
                             </div>
                             <div>
                               <p className="font-semibold">Warehouse</p>
-                              <p>{selectedBooking.warehouses?.name}</p>
+                              <p>{selectedBooking.warehouses?.name || "Unknown Warehouse"}</p>
                               <p className="text-sm text-muted-foreground">{selectedBooking.warehouses?.location}</p>
                             </div>
                             <div>
@@ -288,7 +288,7 @@ const BookingManagement = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Warehouse className="h-4 w-4 text-muted-foreground" />
-                  <span>{booking.warehouses?.name}</span>
+                  <span>{booking.warehouses?.name || "Unknown"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />

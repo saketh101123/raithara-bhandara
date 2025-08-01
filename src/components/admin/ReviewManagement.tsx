@@ -21,11 +21,11 @@ interface Review {
     first_name: string;
     last_name: string;
     email: string;
-  };
+  } | null;
   warehouses?: {
     name: string;
     location: string;
-  };
+  } | null;
 }
 
 const ReviewManagement = () => {
@@ -44,8 +44,8 @@ const ReviewManagement = () => {
         .from("reviews")
         .select(`
           *,
-          profiles:user_id (first_name, last_name, email),
-          warehouses:warehouse_id (name, location)
+          profiles!reviews_user_id_fkey (first_name, last_name, email),
+          warehouses!reviews_warehouse_id_fkey (name, location)
         `)
         .order("created_at", { ascending: false });
 
@@ -200,7 +200,7 @@ const ReviewManagement = () => {
                   <div className="flex items-center gap-2">
                     <Warehouse className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="font-medium">{review.warehouses?.name}</p>
+                      <p className="font-medium">{review.warehouses?.name || "Unknown Warehouse"}</p>
                       <p className="text-muted-foreground">{review.warehouses?.location}</p>
                     </div>
                   </div>
