@@ -107,10 +107,10 @@ const WarehouseManagement = () => {
           description: "Warehouse updated successfully",
         });
       } else {
-        // For new warehouses, insert without specifying ID (auto-generated)
+        // For new warehouses, insert without ID (it will be auto-generated)
         const { error } = await supabase
           .from("warehouses")
-          .insert([warehouseData]);
+          .insert(warehouseData as any); // Type assertion to bypass the id requirement
 
         if (error) throw error;
 
