@@ -107,10 +107,10 @@ const WarehouseManagement = () => {
           description: "Warehouse updated successfully",
         });
       } else {
-        // For new warehouses, insert as single object
+        // For new warehouses, insert without specifying ID (auto-generated)
         const { error } = await supabase
           .from("warehouses")
-          .insert(warehouseData);
+          .insert([warehouseData]);
 
         if (error) throw error;
 
