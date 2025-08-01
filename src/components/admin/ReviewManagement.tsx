@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,31 +39,42 @@ const ReviewManagement = () => {
 
   const fetchReviews = async () => {
     try {
-      const { data, error } = await supabase
+      // First, get all reviews
+      const { data: reviewsData, error: reviewsError } = await supabase
         .from("reviews")
-        .select(`
-          id,
-          user_id,
-          warehouse_id,
-          rating,
-          comment,
-          created_at,
-          updated_at,
-          profiles (first_name, last_name, email),
-          warehouses (name, location)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      
-      // Type assertion to handle the data properly
-      const typedReviews = (data || []).map(review => ({
+      if (reviewsError) throw reviewsError;
+
+      // Get all unique user IDs and warehouse IDs
+      const userIds = [...new Set(reviewsData?.map(r => r.user_id))];
+      const warehouseIds = [...new Set(reviewsData?.map(r => r.warehouse_id))];
+
+      // Fetch profiles
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", userIds);
+
+      // Fetch warehouses
+      const { data: warehousesData } = await supabase
+        .from("warehouses")
+        .select("id, name, location")
+        .in("id", warehouseIds);
+
+      // Create lookup maps
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const warehousesMap = new Map(warehousesData?.map(w => [w.id, w]) || []);
+
+      // Merge the data
+      const enrichedReviews = reviewsData?.map(review => ({
         ...review,
-        profiles: review.profiles as { first_name: string; last_name: string; email: string } | null,
-        warehouses: review.warehouses as { name: string; location: string } | null
-      }));
-      
-      setReviews(typedReviews);
+        profiles: profilesMap.get(review.user_id) || null,
+        warehouses: warehousesMap.get(review.warehouse_id) || null
+      })) || [];
+
+      setReviews(enrichedReviews);
     } catch (error) {
       console.error("Error fetching reviews:", error);
       toast({

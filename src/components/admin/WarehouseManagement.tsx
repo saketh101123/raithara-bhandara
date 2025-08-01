@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,10 +107,10 @@ const WarehouseManagement = () => {
           description: "Warehouse updated successfully",
         });
       } else {
-        // For new warehouses, we let Supabase auto-generate the ID
+        // For new warehouses, insert as single object
         const { error } = await supabase
           .from("warehouses")
-          .insert([warehouseData]);
+          .insert(warehouseData);
 
         if (error) throw error;
 

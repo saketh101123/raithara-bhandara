@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,34 +46,42 @@ const BookingManagement = () => {
 
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
+      // First, get all bookings
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from("bookings")
-        .select(`
-          id,
-          user_id,
-          warehouse_id,
-          start_date,
-          end_date,
-          quantity,
-          duration,
-          total_amount,
-          status,
-          booking_date,
-          profiles (first_name, last_name, email),
-          warehouses (name, location)
-        `)
+        .select("*")
         .order("booking_date", { ascending: false });
 
-      if (error) throw error;
-      
-      // Type assertion to handle the data properly
-      const typedBookings = (data || []).map(booking => ({
+      if (bookingsError) throw bookingsError;
+
+      // Get all unique user IDs and warehouse IDs
+      const userIds = [...new Set(bookingsData?.map(b => b.user_id))];
+      const warehouseIds = [...new Set(bookingsData?.map(b => b.warehouse_id))];
+
+      // Fetch profiles
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", userIds);
+
+      // Fetch warehouses
+      const { data: warehousesData } = await supabase
+        .from("warehouses")
+        .select("id, name, location")
+        .in("id", warehouseIds);
+
+      // Create lookup maps
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const warehousesMap = new Map(warehousesData?.map(w => [w.id, w]) || []);
+
+      // Merge the data
+      const enrichedBookings = bookingsData?.map(booking => ({
         ...booking,
-        profiles: booking.profiles as { first_name: string; last_name: string; email: string } | null,
-        warehouses: booking.warehouses as { name: string; location: string } | null
-      }));
-      
-      setBookings(typedBookings);
+        profiles: profilesMap.get(booking.user_id) || null,
+        warehouses: warehousesMap.get(booking.warehouse_id) || null
+      })) || [];
+
+      setBookings(enrichedBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       toast({
