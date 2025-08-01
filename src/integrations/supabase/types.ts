@@ -7,8 +7,114 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
+  }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          admin_id: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          session_token: string
+          user_agent: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          session_token: string
+          user_agent?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          session_token?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sessions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_important: boolean | null
+          title: string
+          title_kannada: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_important?: boolean | null
+          title: string
+          title_kannada?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_important?: boolean | null
+          title?: string
+          title_kannada?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_date: string | null
@@ -56,26 +162,128 @@ export type Database = {
           },
         ]
       }
+      live_darshan: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_live: boolean | null
+          stream_url: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_live?: boolean | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_live?: boolean | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      local_bookmarks: {
+        Row: {
+          bookmarked_at: string
+          id: string
+          scholarship_data: Json
+          session_id: string
+        }
+        Insert: {
+          bookmarked_at?: string
+          id?: string
+          scholarship_data: Json
+          session_id: string
+        }
+        Update: {
+          bookmarked_at?: string
+          id?: string
+          scholarship_data?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
           phone_number: string | null
+          role: string | null
           updated_at: string | null
         }
         Insert: {
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
           phone_number?: string | null
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone_number?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      pujas: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          description_kannada: string | null
+          duration_minutes: number | null
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          name: string
+          name_kannada: string | null
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          description_kannada?: string | null
+          duration_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name: string
+          name_kannada?: string | null
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          description_kannada?: string | null
+          duration_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name?: string
+          name_kannada?: string | null
+          price?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -118,6 +326,117 @@ export type Database = {
           },
         ]
       }
+      saved_scholarships: {
+        Row: {
+          id: string
+          notes: string | null
+          saved_at: string
+          scholarship_data: Json
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          saved_at?: string
+          scholarship_data: Json
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          saved_at?: string
+          scholarship_data?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      scholarships: {
+        Row: {
+          amount: string
+          application_deadline: string
+          category: string
+          created_at: string
+          description: string
+          eligibility: string
+          id: string
+          level: string
+          name: string
+          official_website: string
+          provider: string
+          requirements: Json | null
+          updated_at: string
+        }
+        Insert: {
+          amount: string
+          application_deadline: string
+          category: string
+          created_at?: string
+          description: string
+          eligibility: string
+          id?: string
+          level: string
+          name: string
+          official_website: string
+          provider: string
+          requirements?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: string
+          application_deadline?: string
+          category?: string
+          created_at?: string
+          description?: string
+          eligibility?: string
+          id?: string
+          level?: string
+          name?: string
+          official_website?: string
+          provider?: string
+          requirements?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      temple_info: {
+        Row: {
+          address: string | null
+          banner_image_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          phone: string | null
+          timing_evening: string | null
+          timing_morning: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          banner_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          timing_evening?: string | null
+          timing_morning?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          banner_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          timing_evening?: string | null
+          timing_morning?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       warehouses: {
         Row: {
           available: boolean | null
@@ -127,6 +446,7 @@ export type Database = {
           location: string
           name: string
           price: number
+          updated_at: string | null
         }
         Insert: {
           available?: boolean | null
@@ -136,6 +456,7 @@ export type Database = {
           location: string
           name: string
           price: number
+          updated_at?: string | null
         }
         Update: {
           available?: boolean | null
@@ -145,6 +466,7 @@ export type Database = {
           location?: string
           name?: string
           price?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -164,21 +486,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -196,14 +522,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -219,14 +547,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -242,14 +572,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -257,14 +589,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

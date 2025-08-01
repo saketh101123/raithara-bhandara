@@ -1,210 +1,228 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Menu, X, Shield } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
 
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Home, Package, DollarSign, Phone, LogIn, UserPlus, History } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useIsMobile } from '@/hooks/use-mobile';
+interface ProfileData {
+  first_name: string | null;
+  last_name: string | null;
+  role: string | null;
+}
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
-  };
+  const [isOpen, setIsOpen] = useState(false);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+    const fetchProfile = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, role")
+            .eq("id", user.id)
+            .single();
+
+          if (error) {
+            console.error("Error fetching profile:", error);
+          } else {
+            setProfile(data);
+          }
+        } catch (error) {
+          console.error("Error in profile fetch:", error);
+        }
+      }
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
+    fetchProfile();
+  }, [user]);
 
   const navItems = [
-    { label: 'Home', path: '/', icon: <Home className="h-4 w-4 mr-2" /> },
-    { label: 'Warehouses', path: '/warehouses', icon: <Package className="h-4 w-4 mr-2" /> },
-    { label: 'Logistics', path: '/pricing', icon: <DollarSign className="h-4 w-4 mr-2" /> },
-    { label: 'Contact', path: '/contact', icon: <Phone className="h-4 w-4 mr-2" /> },
+    { name: "Home", path: "/" },
+    { name: "Features", path: "/features" },
+    { name: "Warehouses", path: "/warehouses" },
+    { name: "Pricing", path: "/pricing" },
+    { name: "Contact", path: "/contact" },
   ];
 
-  const userNavItems = user
-    ? [
-        { label: 'History', path: '/dashboard', icon: <History className="h-4 w-4 mr-2" /> },
-        { label: 'Profile', path: '/profile', icon: <User className="h-4 w-4 mr-2" /> },
-        { label: 'Logout', onClick: handleLogout, icon: <LogOut className="h-4 w-4 mr-2" /> },
-      ]
-    : [
-        { label: 'Login', path: '/login', icon: <LogIn className="h-4 w-4 mr-2" /> },
-        { label: 'Register', path: '/register', icon: <UserPlus className="h-4 w-4 mr-2" /> },
-      ];
-
   return (
-    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ease-out ${
-      isScrolled 
-        ? 'bg-background/95 backdrop-blur-sm shadow-lg shadow-primary/5 transform' 
-        : 'bg-transparent'
-    }`}>
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link 
-            to="/" 
-            className="text-2xl font-display font-bold text-primary hover:opacity-80 transition-all duration-300 ease-out transform hover:scale-105"
-          >
-            Raithara Bhandara
-          </Link>
-          
+    <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex-shrink-0">
+            <Link to="/" className="text-2xl font-display font-bold text-primary hover:text-primary/80 transition-colors">
+              Raithara Bhandara
+            </Link>
+          </div>
+
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item, index) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 ${
-                  location.pathname === item.path
-                    ? 'bg-primary text-primary-foreground shadow-lg'
-                    : 'text-foreground hover:bg-muted hover:shadow-md'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {item.label}
-              </Link>
-            ))}
-            
-            {userNavItems.map((item, index) => 
-              item.path ? (
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              {navItems.map((item) => (
                 <Link
-                  key={item.label}
+                  key={item.name}
                   to={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 ${
-                    location.pathname === item.path
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-foreground hover:bg-muted hover:shadow-md'
-                  }`}
-                  style={{ animationDelay: `${(navItems.length + index) * 100}ms` }}
+                  className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors hover:scale-105 transform duration-200"
                 >
-                  {item.label}
+                  {item.name}
                 </Link>
-              ) : (
-                <button
-                  key={item.label}
-                  onClick={item.onClick}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ animationDelay: `${(navItems.length + index) * 100}ms` }}
-                >
-                  {item.label}
-                </button>
-              )
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt={user.email} />
+                      <AvatarFallback>
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.email}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {profile?.first_name} {profile?.last_name}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/history">Booking History</Link>
+                  </DropdownMenuItem>
+                  {profile?.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="text-primary font-medium">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/register">Sign Up</Link>
+                </Button>
+              </>
             )}
-          </nav>
-          
-          {/* Mobile Menu Button */}
-          <button
-            type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-110 hover:rotate-3"
-            onClick={toggleMenu}
-          >
-            <span className="sr-only">Open main menu</span>
-            <div className="relative w-6 h-6">
-              <Menu 
-                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ease-out ${
-                  isMenuOpen ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
-                }`} 
-                aria-hidden="true" 
-              />
-              <X 
-                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ease-out ${
-                  isMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'
-                }`} 
-                aria-hidden="true" 
-              />
-            </div>
-          </button>
-        </div>
-      </div>
-      
-      {/* Mobile Navigation */}
-      <div className={`md:hidden overflow-hidden transition-all duration-500 ease-out ${
-        isMenuOpen 
-          ? 'max-h-96 opacity-100' 
-          : 'max-h-0 opacity-0'
-      }`}>
-        <div className="bg-card/95 backdrop-blur-sm border-t border-border/50 shadow-lg">
-          <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
-            {navItems.map((item, index) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 ${
-                  location.pathname === item.path
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-foreground hover:bg-muted hover:shadow-sm'
-                }`}
-                onClick={closeMenu}
-                style={{ 
-                  animationDelay: `${index * 100}ms`,
-                  transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
-                  opacity: isMenuOpen ? 1 : 0,
-                  transition: `all 0.3s ease-out ${index * 100}ms`
-                }}
-              >
-                <span className="icon-hover">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
-            
-            <div className="pt-4 border-t border-border/50">
-              {userNavItems.map((item, index) => 
-                item.path ? (
-                  <Link
-                    key={item.label}
-                    to={item.path}
-                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 hover:shadow-sm"
-                    onClick={closeMenu}
-                    style={{ 
-                      animationDelay: `${(navItems.length + index) * 100}ms`,
-                      transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
-                      opacity: isMenuOpen ? 1 : 0,
-                      transition: `all 0.3s ease-out ${(navItems.length + index) * 100}ms`
-                    }}
-                  >
-                    <span className="icon-hover">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={() => {
-                      closeMenu();
-                      item.onClick?.();
-                    }}
-                    className="flex items-center w-full text-left px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted transition-all duration-300 ease-out transform hover:scale-105 hover:translate-x-2 hover:shadow-sm"
-                    style={{ 
-                      animationDelay: `${(navItems.length + index) * 100}ms`,
-                      transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
-                      opacity: isMenuOpen ? 1 : 0,
-                      transition: `all 0.3s ease-out ${(navItems.length + index) * 100}ms`
-                    }}
-                  >
-                    <span className="icon-hover">{item.icon}</span>
-                    {item.label}
-                  </button>
-                )
-              )}
-            </div>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </Button>
           </div>
         </div>
       </div>
-    </header>
+
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="md:hidden animate-slide-in">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-t">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+            {user ? (
+              <>
+                <div className="border-t pt-4 mt-4">
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-medium">{user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {profile?.first_name} {profile?.last_name}
+                    </p>
+                  </div>
+                  <Link
+                    to="/profile"
+                    className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/history"
+                    className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Booking History
+                  </Link>
+                  {profile?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="block px-3 py-2 text-base font-medium text-primary transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Shield className="w-4 h-4 mr-2 inline" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setIsOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    Log out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="border-t pt-4 mt-4 space-y-2">
+                <Link
+                  to="/login"
+                  className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="block px-3 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md mx-3"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
   );
 };
 
