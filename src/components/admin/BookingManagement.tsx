@@ -50,14 +50,31 @@ const BookingManagement = () => {
       const { data, error } = await supabase
         .from("bookings")
         .select(`
-          *,
-          profiles!bookings_user_id_fkey (first_name, last_name, email),
-          warehouses!bookings_warehouse_id_fkey (name, location)
+          id,
+          user_id,
+          warehouse_id,
+          start_date,
+          end_date,
+          quantity,
+          duration,
+          total_amount,
+          status,
+          booking_date,
+          profiles (first_name, last_name, email),
+          warehouses (name, location)
         `)
         .order("booking_date", { ascending: false });
 
       if (error) throw error;
-      setBookings(data || []);
+      
+      // Type assertion to handle the data properly
+      const typedBookings = (data || []).map(booking => ({
+        ...booking,
+        profiles: booking.profiles as { first_name: string; last_name: string; email: string } | null,
+        warehouses: booking.warehouses as { name: string; location: string } | null
+      }));
+      
+      setBookings(typedBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       toast({

@@ -108,9 +108,10 @@ const WarehouseManagement = () => {
           description: "Warehouse updated successfully",
         });
       } else {
+        // For new warehouses, we let Supabase auto-generate the ID
         const { error } = await supabase
           .from("warehouses")
-          .insert(warehouseData);
+          .insert([warehouseData]);
 
         if (error) throw error;
 

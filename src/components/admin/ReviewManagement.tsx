@@ -43,14 +43,28 @@ const ReviewManagement = () => {
       const { data, error } = await supabase
         .from("reviews")
         .select(`
-          *,
-          profiles!reviews_user_id_fkey (first_name, last_name, email),
-          warehouses!reviews_warehouse_id_fkey (name, location)
+          id,
+          user_id,
+          warehouse_id,
+          rating,
+          comment,
+          created_at,
+          updated_at,
+          profiles (first_name, last_name, email),
+          warehouses (name, location)
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setReviews(data || []);
+      
+      // Type assertion to handle the data properly
+      const typedReviews = (data || []).map(review => ({
+        ...review,
+        profiles: review.profiles as { first_name: string; last_name: string; email: string } | null,
+        warehouses: review.warehouses as { name: string; location: string } | null
+      }));
+      
+      setReviews(typedReviews);
     } catch (error) {
       console.error("Error fetching reviews:", error);
       toast({
