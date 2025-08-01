@@ -27,30 +27,14 @@ const AdminPanel = () => {
         return;
       }
 
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error checking admin access:", error);
-          navigate("/");
-          return;
-        }
-
-        if (data?.role === "admin") {
-          setIsAdmin(true);
-        } else {
-          navigate("/");
-        }
-      } catch (error) {
-        console.error("Error in admin check:", error);
+      // Check if user email is the admin email
+      if (user.email === "saketh1011@gmail.com") {
+        setIsAdmin(true);
+      } else {
         navigate("/");
-      } finally {
-        setCheckingAccess(false);
       }
+      
+      setCheckingAccess(false);
     };
 
     if (!isLoading) {

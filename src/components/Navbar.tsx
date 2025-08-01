@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, Shield } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -105,17 +106,6 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/history">Booking History</Link>
                   </DropdownMenuItem>
-                  {profile?.role === 'admin' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="text-primary font-medium">
-                          <Shield className="w-4 h-4 mr-2" />
-                          Admin Panel
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}>
                     Log out
@@ -180,16 +170,6 @@ const Navbar = () => {
                   >
                     Booking History
                   </Link>
-                  {profile?.role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="block px-3 py-2 text-base font-medium text-primary transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Shield className="w-4 h-4 mr-2 inline" />
-                      Admin Panel
-                    </Link>
-                  )}
                   <button
                     onClick={() => {
                       signOut();

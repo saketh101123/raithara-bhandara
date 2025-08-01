@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 
 interface ProfileData {
   id: string;
@@ -56,6 +56,9 @@ const Profile = () => {
   if (!user) {
     return null; // Will redirect in useEffect
   }
+
+  // Check if user is admin
+  const isAdmin = user.email === "saketh1011@gmail.com";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -109,6 +112,16 @@ const Profile = () => {
                   >
                     Back to Home
                   </Button>
+                  {isAdmin && (
+                    <Button 
+                      variant="default" 
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white" 
+                      onClick={() => navigate("/admin")}
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin Panel
+                    </Button>
+                  )}
                   <Button 
                     variant="destructive" 
                     className="w-full" 
