@@ -1,105 +1,147 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import WarehouseHeader from '@/components/warehouse/WarehouseHeader';
-import WarehouseDescription from '@/components/warehouse/WarehouseDescription';
-import WarehouseFeatures from '@/components/warehouse/WarehouseFeatures';
+import WarehouseDetailsComponent from '@/components/warehouse/WarehouseDetails';
 import BookingCard from '@/components/warehouse/BookingCard';
+import WarehouseFeatures from '@/components/warehouse/WarehouseFeatures';
+import WarehouseDescription from '@/components/warehouse/WarehouseDescription';
 import WarehouseReviews from '@/components/reviews/WarehouseReviews';
 import LoadingState from '@/components/warehouse/LoadingState';
 import NotFoundState from '@/components/warehouse/NotFoundState';
-import { warehousesData } from '@/data/warehousesData';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+
+interface Warehouse {
+  id: number;
+  name: string;
+  location: string;
+  price: number;
+  available: boolean;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const WarehouseDetails = () => {
-  const { warehouseId } = useParams<{ warehouseId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [warehouse, setWarehouse] = useState<any>(null);
+  const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchWarehouseDetails = async () => {
-      setIsLoading(true);
+    const fetchWarehouse = async () => {
+      if (!id) {
+        setError('Invalid warehouse ID');
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Normally we would fetch from an API endpoint here
-        // Simulate API call with a timeout
-        setTimeout(() => {
-          const foundWarehouse = warehousesData.find(w => w.id === parseInt(warehouseId || '0'));
-          setWarehouse(foundWarehouse || null);
-          setIsLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error('Error fetching warehouse details:', error);
-        setIsLoading(false);
+        const { data, error: fetchError } = await supabase
+          .from('warehouses')
+          .select('*')
+          .eq('id', parseInt(id))
+          .single();
+
+        if (fetchError) {
+          console.error('Error fetching warehouse:', fetchError);
+          setError('Warehouse not found');
+        } else {
+          setWarehouse(data);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Failed to load warehouse details');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchWarehouseDetails();
-  }, [warehouseId]);
+    fetchWarehouse();
+  }, [id]);
 
   const handleBookNow = () => {
-    if (!user) {
-      toast.error("Please log in to book a storage unit");
-      // Pass the current URL as the return URL
-      navigate('/login', { state: { returnUrl: `/warehouse/${warehouseId}` } });
-      return;
+    if (warehouse) {
+      navigate(`/payment?warehouseId=${warehouse.id}&price=${warehouse.price}`);
     }
-    
-    // Fixed route to match the route defined in App.tsx
-    navigate(`/payment/${warehouseId}`);
   };
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingState />;
   }
 
-  if (!warehouse) {
+  if (error || !warehouse) {
     return <NotFoundState />;
   }
 
+  // Transform warehouse data to match component expectations
+  const warehouseData = {
+    capacity: '5,000 metric tons', // Default capacity - could be added to database
+    price: `₹${warehouse.price} per metric ton per day`,
+    available: warehouse.available
+  };
+
+  const features = [
+    'Temperature Control (-5° to 5°C)',
+    'Humidity Control (65-70%)',
+    '24/7 Security & Monitoring',
+    'Loading & Unloading Dock',
+    'Quality Testing Lab',
+    'Power Backup Generator',
+    'Fire Safety Systems',
+    'Pest Control Management'
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-24">
-        <div className="max-w-7xl mx-auto">
-          <WarehouseHeader 
-            warehouseName={warehouse.name} 
-            location={warehouse.location} 
-            rating={warehouse.rating} 
-            reviewCount={5} 
-            imageUrl={warehouse.image} 
-          />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+      <main className="flex-grow py-24">
+        <div className="container mx-auto px-4">
+          {/* Header Section */}
+          <div className="mb-8">
+            <WarehouseHeader
+              warehouseName={warehouse.name}
+              location={warehouse.location}
+              rating={4.5}
+              reviewCount={127}
+              imageUrl="/lovable-uploads/8eaf55a2-72f8-4628-a7ce-3cabd024f2d7.png"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-8">
-              <WarehouseDescription />
-              
-              <WarehouseFeatures 
-                features={warehouse.features} 
-              />
-              
-              <WarehouseReviews 
-                warehouseId={warehouse.id} 
+              <WarehouseDetailsComponent warehouse={warehouseData} />
+              <WarehouseFeatures features={features} />
+              <WarehouseDescription 
+                description={warehouse.description || 'Modern cold storage facility with state-of-the-art temperature and humidity control systems. Perfect for storing agricultural produce, maintaining freshness and quality.'}
               />
             </div>
-            
+
+            {/* Right Column - Booking */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <BookingCard 
-                  warehousePrice={warehouse.price}
-                  warehouseAvailability={warehouse.available ? 'Available Now' : 'Currently Full'} 
-                  onBookNow={handleBookNow} 
+                <BookingCard
+                  warehousePrice={warehouseData.price}
+                  warehouseAvailability={warehouse.available ? 'Available Now' : 'Fully Booked'}
+                  onBookNow={handleBookNow}
                 />
               </div>
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <div className="mt-12">
+            <WarehouseReviews warehouseId={warehouse.id} />
+          </div>
         </div>
-      </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

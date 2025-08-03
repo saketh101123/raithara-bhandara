@@ -1,12 +1,54 @@
 
+import { useState, useEffect } from 'react';
 import { MapPin, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { warehousesData } from '@/data/warehousesData';
-
-// Use the first 3 warehouses from the shared data
-const featuredWarehouses = warehousesData.slice(0, 3);
+import { fetchWarehousesData, type WarehouseData } from '@/data/warehousesData';
 
 const FeaturedWarehouses = () => {
+  const [warehouses, setWarehouses] = useState<WarehouseData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadWarehouses = async () => {
+      try {
+        const data = await fetchWarehousesData();
+        // Get first 3 warehouses for featured section
+        setWarehouses(data.slice(0, 3));
+      } catch (error) {
+        console.error('Error loading featured warehouses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWarehouses();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-green-50" id="warehouses">
+        <div className="container mx-auto px-4">
+          <div className="text-center">Loading warehouses...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (warehouses.length === 0) {
+    return (
+      <section className="py-20 bg-green-50" id="warehouses">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-4">
+            Featured Storage Facilities
+          </h2>
+          <p className="text-center text-foreground/70 mb-16 max-w-2xl mx-auto">
+            No warehouses available at the moment. Please check back later.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-green-50" id="warehouses">
       <div className="container mx-auto px-4">
@@ -18,7 +60,7 @@ const FeaturedWarehouses = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredWarehouses.map((warehouse, index) => (
+          {warehouses.map((warehouse, index) => (
             <div key={warehouse.id} 
                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-up"
                  style={{ animationDelay: `${index * 0.1 + 0.1}s` }}>

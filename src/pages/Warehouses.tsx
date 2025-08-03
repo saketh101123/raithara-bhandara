@@ -1,154 +1,236 @@
 
-import { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import { MapPin, Star, Search, FilterX, Calendar, Truck } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { warehousesData } from '@/data/warehousesData';
+import { MapPin, Star, Filter, Search } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { fetchWarehousesData, type WarehouseData } from '@/data/warehousesData';
 
 const Warehouses = () => {
+  const [warehouses, setWarehouses] = useState<WarehouseData[]>([]);
+  const [filteredWarehouses, setFilteredWarehouses] = useState<WarehouseData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredWarehouses, setFilteredWarehouses] = useState(warehousesData);
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [locationFilter, setLocationFilter] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState('');
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const filtered = warehousesData.filter(warehouse => 
-      (warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (showOnlyAvailable ? warehouse.available : true)
-    );
-    setFilteredWarehouses(filtered);
-  };
+  useEffect(() => {
+    const loadWarehouses = async () => {
+      try {
+        const data = await fetchWarehousesData();
+        setWarehouses(data);
+        setFilteredWarehouses(data);
+      } catch (error) {
+        console.error('Error loading warehouses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleReset = () => {
-    setSearchTerm('');
-    setShowOnlyAvailable(false);
-    setFilteredWarehouses(warehousesData);
-  };
+    loadWarehouses();
+  }, []);
 
-  const handleAvailabilityToggle = () => {
-    const newState = !showOnlyAvailable;
-    setShowOnlyAvailable(newState);
-    
-    if (newState) {
-      setFilteredWarehouses(warehousesData.filter(w => w.available));
-    } else {
-      setFilteredWarehouses(warehousesData);
+  useEffect(() => {
+    let filtered = warehouses;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(warehouse =>
+        warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  };
+
+    // Location filter
+    if (locationFilter) {
+      filtered = filtered.filter(warehouse =>
+        warehouse.location.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+
+    // Availability filter
+    if (availabilityFilter === 'available') {
+      filtered = filtered.filter(warehouse => warehouse.available);
+    } else if (availabilityFilter === 'unavailable') {
+      filtered = filtered.filter(warehouse => !warehouse.available);
+    }
+
+    setFilteredWarehouses(filtered);
+  }, [searchTerm, locationFilter, availabilityFilter, warehouses]);
+
+  // Get unique locations for filter
+  const uniqueLocations = Array.from(new Set(warehouses.map(w => w.location)));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">Loading warehouses...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-24">
-        <h1 className="text-4xl font-display font-bold text-primary mb-8">Find Storage Facilities</h1>
-        
-        <div className="mb-8">
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/60" size={18} />
-                <Input 
-                  type="text"
-                  placeholder="Search by location or warehouse name" 
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+      
+      <main className="flex-grow py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
+              Find the Perfect Storage
+            </h1>
+            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+              Browse our network of verified cold storage facilities across Karnataka
+            </p>
+          </div>
+
+          {/* Filters */}
+          <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search warehouses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            <div className="flex gap-2">
-              <Button type="submit">Search</Button>
-              <Button type="button" variant="outline" onClick={handleReset} className="flex items-center gap-2">
-                <FilterX size={16} /> Reset
+            
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Locations</SelectItem>
+                {uniqueLocations.map((location) => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by availability" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Warehouses</SelectItem>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="unavailable">Fully Booked</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Results count */}
+          <div className="mb-6">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredWarehouses.length} of {warehouses.length} warehouses
+            </p>
+          </div>
+
+          {/* Warehouse Grid */}
+          {filteredWarehouses.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-lg text-muted-foreground mb-4">
+                No warehouses found matching your criteria
+              </p>
+              <Button 
+                onClick={() => {
+                  setSearchTerm('');
+                  setLocationFilter('');
+                  setAvailabilityFilter('');
+                }}
+                variant="outline"
+              >
+                Clear Filters
               </Button>
             </div>
-          </form>
-          
-          <div className="mt-4 flex items-center">
-            <Button 
-              type="button" 
-              variant={showOnlyAvailable ? "default" : "outline"} 
-              className="text-sm"
-              onClick={handleAvailabilityToggle}
-            >
-              {showOnlyAvailable ? "Showing Available Only" : "Show All Warehouses"}
-            </Button>
-          </div>
-        </div>
-
-        {filteredWarehouses.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-lg text-foreground/70">No warehouses found matching your criteria.</p>
-            <Button variant="outline" onClick={handleReset} className="mt-4">
-              Reset Filters
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredWarehouses.map((warehouse) => (
-              <Card key={warehouse.id} className={`overflow-hidden h-full hover:shadow-md transition-shadow ${!warehouse.available ? 'opacity-70' : ''}`}>
-                <div className="relative h-48">
-                  <img 
-                    src={warehouse.image} 
-                    alt={warehouse.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {!warehouse.available && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="bg-red-500 text-white px-3 py-1 rounded-md text-sm font-medium">
-                        Fully Booked
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{warehouse.name}</h3>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm">{warehouse.rating}</span>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredWarehouses.map((warehouse) => (
+                <div 
+                  key={warehouse.id}
+                  className="bg-card rounded-xl border shadow-sm hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="relative h-48">
+                    <img 
+                      src={warehouse.image} 
+                      alt={warehouse.name}
+                      className="w-full h-full object-cover rounded-t-xl"
+                    />
+                    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium ${
+                      warehouse.available 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      {warehouse.available ? 'Available' : 'Fully Booked'}
                     </div>
                   </div>
                   
-                  <div className="flex items-center text-sm text-foreground/70 mb-2">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span>{warehouse.location} ({warehouse.distance} from Bangalore)</span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-foreground/70 mb-4">
-                    <Truck className="w-4 h-4 mr-1" />
-                    <span>Capacity: {warehouse.capacity}</span>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {warehouse.features.slice(0, 2).map((feature, idx) => (
-                      <span key={idx} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-                        {feature}
-                      </span>
-                    ))}
-                    {warehouse.features.length > 2 && (
-                      <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                        +{warehouse.features.length - 2} more
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-primary font-semibold">{warehouse.price}</div>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-semibold text-lg">{warehouse.name}</h3>
+                      <div className="flex items-center">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="ml-1 text-sm">{warehouse.rating}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground mb-4">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span>{warehouse.location}</span>
+                      <span className="ml-auto">{warehouse.distance}</span>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span>Capacity:</span>
+                        <span className="font-medium">{warehouse.capacity}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Price:</span>
+                        <span className="font-medium text-primary">{warehouse.price}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mb-4">
+                      {warehouse.features.slice(0, 2).map((feature, index) => (
+                        <span 
+                          key={index}
+                          className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded-full"
+                        >
+                          {feature}
+                        </span>
+                      ))}
+                      {warehouse.features.length > 2 && (
+                        <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded-full">
+                          +{warehouse.features.length - 2} more
+                        </span>
+                      )}
+                    </div>
+                    
                     <Link to={`/warehouse/${warehouse.id}`}>
-                      <Button size="sm">View Details</Button>
+                      <Button className="w-full">
+                        View Details
+                      </Button>
                     </Link>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
