@@ -1,22 +1,27 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Truck, Building, Shield, Clock, Thermometer } from 'lucide-react';
 
-const WarehouseDescription = () => {
+interface WarehouseDescriptionProps {
+  description?: string;
+}
+
+const WarehouseDescription = ({ description }: WarehouseDescriptionProps) => {
+  const defaultDescription = "This state-of-the-art cold storage facility provides optimal conditions for preserving your agricultural produce. Equipped with advanced temperature and humidity control systems, it ensures that your crops maintain their freshness and quality for extended periods.";
+  
+  const secondaryDescription = "The facility offers flexible storage options, 24/7 security, and easy access for loading and unloading. Our experienced staff is dedicated to providing excellent service and ensuring your produce is stored in ideal conditions.";
+
   return (
     <Card className="mb-8">
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4">About This Facility</h3>
         
         <p className="mb-4">
-          This state-of-the-art cold storage facility provides optimal conditions for preserving your agricultural produce. 
-          Equipped with advanced temperature and humidity control systems, it ensures that your crops maintain their freshness and quality for extended periods.
+          {description || defaultDescription}
         </p>
         
         <p className="mb-6">
-          The facility offers flexible storage options, 24/7 security, and easy access for loading and unloading. 
-          Our experienced staff is dedicated to providing excellent service and ensuring your produce is stored in ideal conditions.
+          {secondaryDescription}
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
