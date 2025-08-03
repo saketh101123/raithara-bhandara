@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,18 +44,24 @@ const WarehouseManagement = () => {
 
   const fetchWarehouses = async () => {
     try {
+      console.log("Fetching warehouses...");
       const { data, error } = await supabase
         .from("warehouses")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching warehouses:", error);
+        throw error;
+      }
+      
+      console.log("Warehouses fetched successfully:", data);
       setWarehouses(data || []);
     } catch (error) {
-      console.error("Error fetching warehouses:", error);
+      console.error("Error in fetchWarehouses:", error);
       toast({
         title: "Error",
-        description: "Failed to load warehouses",
+        description: "Failed to load warehouses. Please check your admin permissions.",
         variant: "destructive",
       });
     } finally {
@@ -94,25 +101,32 @@ const WarehouseManagement = () => {
         available: formData.available,
       };
 
+      console.log("Submitting warehouse data:", warehouseData);
+
       if (editingWarehouse) {
         const { error } = await supabase
           .from("warehouses")
           .update(warehouseData)
           .eq("id", editingWarehouse.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update error:", error);
+          throw error;
+        }
 
         toast({
           title: "Success",
           description: "Warehouse updated successfully",
         });
       } else {
-        // For new warehouses, insert without ID (it will be auto-generated)
         const { error } = await supabase
           .from("warehouses")
-          .insert(warehouseData as any); // Type assertion to bypass the id requirement
+          .insert(warehouseData);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Insert error:", error);
+          throw error;
+        }
 
         toast({
           title: "Success",
@@ -127,7 +141,7 @@ const WarehouseManagement = () => {
       console.error("Error saving warehouse:", error);
       toast({
         title: "Error",
-        description: "Failed to save warehouse",
+        description: `Failed to save warehouse: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }
@@ -147,12 +161,16 @@ const WarehouseManagement = () => {
 
   const handleDelete = async (id: number) => {
     try {
+      console.log("Deleting warehouse with id:", id);
       const { error } = await supabase
         .from("warehouses")
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -163,14 +181,21 @@ const WarehouseManagement = () => {
       console.error("Error deleting warehouse:", error);
       toast({
         title: "Error",
-        description: "Failed to delete warehouse",
+        description: `Failed to delete warehouse: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }
   };
 
   if (loading) {
-    return <div className="text-center py-4">Loading warehouses...</div>;
+    return (
+      <div className="text-center py-8">
+        <div className="flex items-center justify-center gap-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          Loading warehouses...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -222,6 +247,8 @@ const WarehouseManagement = () => {
                 <Input
                   id="price"
                   type="number"
+                  step="0.01"
+                  min="0"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   placeholder="Price per day"
@@ -256,79 +283,95 @@ const WarehouseManagement = () => {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {warehouses.map((warehouse) => (
-          <Card key={warehouse.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{warehouse.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 mt-1">
-                    <MapPin className="h-3 w-3" />
-                    {warehouse.location}
-                  </CardDescription>
+      {warehouses.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Plus className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No warehouses found</h3>
+            <p className="text-muted-foreground mb-4">Get started by adding your first warehouse</p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add First Warehouse
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {warehouses.map((warehouse) => (
+            <Card key={warehouse.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{warehouse.name}</CardTitle>
+                    <CardDescription className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3" />
+                      {warehouse.location}
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(warehouse)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{warehouse.name}"? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(warehouse.id)}
+                            className="bg-destructive text-destructive-foreground"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(warehouse)}
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm">
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{warehouse.name}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(warehouse.id)}
-                          className="bg-destructive text-destructive-foreground"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <span className="font-semibold">₹{warehouse.price.toLocaleString()}/day</span>
+                  </div>
+                  {warehouse.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{warehouse.description}</p>
+                  )}
+                  <div className="flex justify-between items-center pt-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      warehouse.available 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-red-100 text-red-800"
+                    }`}>
+                      {warehouse.available ? "Available" : "Unavailable"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ID: {warehouse.id}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  <span className="font-semibold">₹{warehouse.price.toLocaleString()}/day</span>
-                </div>
-                {warehouse.description && (
-                  <p className="text-sm text-muted-foreground">{warehouse.description}</p>
-                )}
-                <div className="flex justify-between items-center pt-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    warehouse.available 
-                      ? "bg-green-100 text-green-800" 
-                      : "bg-red-100 text-red-800"
-                  }`}>
-                    {warehouse.available ? "Available" : "Unavailable"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ID: {warehouse.id}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

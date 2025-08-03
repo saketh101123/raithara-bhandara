@@ -30,7 +30,9 @@ const AdminPanel = () => {
       // Check if user email is the admin email
       if (user.email === "saketh1011@gmail.com") {
         setIsAdmin(true);
+        console.log("Admin access granted for:", user.email);
       } else {
+        console.log("Access denied. User email:", user.email);
         navigate("/");
       }
       
