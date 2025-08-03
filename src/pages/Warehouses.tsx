@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Star, Filter, Search } from 'lucide-react';
@@ -45,7 +44,7 @@ const Warehouses = () => {
     }
 
     // Location filter
-    if (locationFilter) {
+    if (locationFilter && locationFilter !== 'all') {
       filtered = filtered.filter(warehouse =>
         warehouse.location.toLowerCase().includes(locationFilter.toLowerCase())
       );
@@ -108,7 +107,7 @@ const Warehouses = () => {
                 <SelectValue placeholder="Filter by location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {uniqueLocations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -122,7 +121,7 @@ const Warehouses = () => {
                 <SelectValue placeholder="Filter by availability" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Warehouses</SelectItem>
+                <SelectItem value="all">All Warehouses</SelectItem>
                 <SelectItem value="available">Available</SelectItem>
                 <SelectItem value="unavailable">Fully Booked</SelectItem>
               </SelectContent>
@@ -145,8 +144,8 @@ const Warehouses = () => {
               <Button 
                 onClick={() => {
                   setSearchTerm('');
-                  setLocationFilter('');
-                  setAvailabilityFilter('');
+                  setLocationFilter('all');
+                  setAvailabilityFilter('all');
                 }}
                 variant="outline"
               >
