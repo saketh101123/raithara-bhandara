@@ -23,6 +23,8 @@ interface Warehouse {
   updated_at: string;
 }
 
+type WarehouseInsert = Omit<Warehouse, 'id' | 'created_at' | 'updated_at'>;
+
 const WarehouseManagement = () => {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,20 +95,20 @@ const WarehouseManagement = () => {
     }
 
     try {
-      const warehouseData = {
-        name: formData.name,
-        location: formData.location,
-        description: formData.description || null,
-        price: parseFloat(formData.price),
-        available: formData.available,
-      };
-
-      console.log("Submitting warehouse data:", warehouseData);
+      console.log("Submitting warehouse data:", formData);
 
       if (editingWarehouse) {
+        const updateData = {
+          name: formData.name,
+          location: formData.location,
+          description: formData.description || null,
+          price: parseFloat(formData.price),
+          available: formData.available,
+        };
+
         const { error } = await supabase
           .from("warehouses")
-          .update(warehouseData)
+          .update(updateData)
           .eq("id", editingWarehouse.id);
 
         if (error) {
@@ -119,9 +121,17 @@ const WarehouseManagement = () => {
           description: "Warehouse updated successfully",
         });
       } else {
+        const insertData: WarehouseInsert = {
+          name: formData.name,
+          location: formData.location,
+          description: formData.description || null,
+          price: parseFloat(formData.price),
+          available: formData.available,
+        };
+
         const { error } = await supabase
           .from("warehouses")
-          .insert(warehouseData);
+          .insert(insertData);
 
         if (error) {
           console.error("Insert error:", error);
@@ -137,7 +147,7 @@ const WarehouseManagement = () => {
       setIsDialogOpen(false);
       resetForm();
       fetchWarehouses();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving warehouse:", error);
       toast({
         title: "Error",
@@ -177,7 +187,7 @@ const WarehouseManagement = () => {
         description: "Warehouse deleted successfully",
       });
       fetchWarehouses();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting warehouse:", error);
       toast({
         title: "Error",
