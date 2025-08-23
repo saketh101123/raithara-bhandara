@@ -131,7 +131,7 @@ const WarehouseManagement = () => {
 
         const { error } = await supabase
           .from("warehouses")
-          .insert(insertData);
+          .insert(insertData as any);
 
         if (error) {
           console.error("Insert error:", error);
