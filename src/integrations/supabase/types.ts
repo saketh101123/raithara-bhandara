@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -115,6 +115,56 @@ export type Database = {
         }
         Relationships: []
       }
+      applications: {
+        Row: {
+          created_at: string
+          documents_submitted: number
+          id: string
+          notes: string | null
+          progress: number
+          scholarship_id: string
+          status: string
+          submitted_at: string | null
+          total_documents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          documents_submitted?: number
+          id?: string
+          notes?: string | null
+          progress?: number
+          scholarship_id: string
+          status?: string
+          submitted_at?: string | null
+          total_documents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          documents_submitted?: number
+          id?: string
+          notes?: string | null
+          progress?: number
+          scholarship_id?: string
+          status?: string
+          submitted_at?: string | null
+          total_documents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           booking_date: string | null
@@ -213,6 +263,33 @@ export type Database = {
           id?: string
           scholarship_data?: Json
           session_id?: string
+        }
+        Relationships: []
+      }
+      otp_codes: {
+        Row: {
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          verified: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          verified?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          verified?: boolean
         }
         Relationships: []
       }
@@ -437,6 +514,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_eligibility: {
+        Row: {
+          age: number | null
+          caste: string | null
+          course_type: string | null
+          created_at: string
+          current_class: string
+          disability_percentage: number | null
+          family_income: number
+          family_status: string | null
+          gender: string
+          has_disability: boolean
+          id: string
+          percentage: number | null
+          religion: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          caste?: string | null
+          course_type?: string | null
+          created_at?: string
+          current_class: string
+          disability_percentage?: number | null
+          family_income: number
+          family_status?: string | null
+          gender: string
+          has_disability?: boolean
+          id?: string
+          percentage?: number | null
+          religion?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          caste?: string | null
+          course_type?: string | null
+          created_at?: string
+          current_class?: string
+          disability_percentage?: number | null
+          family_income?: number
+          family_status?: string | null
+          gender?: string
+          has_disability?: boolean
+          id?: string
+          percentage?: number | null
+          religion?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       warehouses: {
         Row: {
           available: boolean | null
@@ -475,7 +606,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_otps: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_otp: {
+        Args: { p_code: string; p_email: string; p_expires_at: string }
+        Returns: boolean
+      }
+      verify_otp: {
+        Args: { p_code: string; p_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
