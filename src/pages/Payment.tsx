@@ -1,10 +1,11 @@
+
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { warehousesData } from '@/data/warehousesData';
 
 // Import the components
 import PaymentHeader from '@/components/payment/PaymentHeader';
@@ -14,14 +15,27 @@ import BookingSummary from '@/components/payment/BookingSummary';
 import BookingConfirmation from '@/components/payment/BookingConfirmation';
 import { Button } from '@/components/ui/button';
 
+interface Warehouse {
+  id: number;
+  name: string;
+  location: string;
+  price: number;
+  available: boolean;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const Payment = () => {
   const { warehouseId } = useParams<{ warehouseId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, session } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  
-  const warehouse = warehousesData.find(w => w.id === Number(warehouseId));
+  const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     quantity: '10', // in metric tons
@@ -46,16 +60,52 @@ const Payment = () => {
     bookingDate: ''
   });
 
+  // Fetch warehouse data from database
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      // Get warehouse ID from URL params or search params
+      const id = warehouseId || searchParams.get('warehouseId');
+      
+      if (!id) {
+        setError('Invalid warehouse ID');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('warehouses')
+          .select('*')
+          .eq('id', parseInt(id))
+          .single();
+
+        if (fetchError) {
+          console.error('Error fetching warehouse:', fetchError);
+          setError('Warehouse not found');
+        } else {
+          setWarehouse(data);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Failed to load warehouse details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWarehouse();
+  }, [warehouseId, searchParams]);
+
   useEffect(() => {
     // Check authentication status only once
     if (!authChecked) {
       if (!user) {
         toast.error("Please log in to book storage");
-        navigate('/login', { state: { returnUrl: `/payment/${warehouseId}` } });
+        navigate('/login', { state: { returnUrl: `/payment?warehouseId=${warehouseId || searchParams.get('warehouseId')}` } });
       }
       setAuthChecked(true);
     }
-  }, [user, authChecked, navigate, warehouseId]);
+  }, [user, authChecked, navigate, warehouseId, searchParams]);
   
   useEffect(() => {
     const today = new Date();
@@ -102,8 +152,7 @@ const Payment = () => {
 
   const getTotalPrice = () => {
     if (!warehouse) return 0;
-    const pricePerDay = parseInt(warehouse.price.replace(/[^0-9]/g, ''));
-    return pricePerDay * Number(formData.quantity) * Number(formData.duration);
+    return warehouse.price * Number(formData.quantity) * Number(formData.duration);
   };
 
   const handlePrint = () => {
@@ -206,10 +255,22 @@ const Payment = () => {
   };
 
   const handleGoBack = () => {
-    navigate(`/warehouse/${warehouseId}`);
+    navigate(`/warehouse/${warehouse?.id || warehouseId || searchParams.get('warehouseId')}`);
   };
 
-  if (!warehouse) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading warehouse details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !warehouse) {
     return (
       <ErrorState 
         title="Warehouse Not Found"
@@ -239,6 +300,17 @@ const Payment = () => {
     return null; // Or a loading spinner
   }
 
+  // Transform warehouse data to match component expectations
+  const warehouseForBooking = {
+    id: warehouse.id,
+    name: warehouse.name,
+    location: warehouse.location,
+    image: '/lovable-uploads/8eaf55a2-72f8-4628-a7ce-3cabd024f2d7.png', // Default image
+    price: `₹${warehouse.price} per metric ton per day`,
+    available: warehouse.available,
+    features: ['Temperature Control', 'Humidity Control', '24/7 Security', 'Loading Dock']
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -258,7 +330,7 @@ const Payment = () => {
             <div className="mb-6">
               <div className="flex items-center mb-4">
                 <img 
-                  src={warehouse.image} 
+                  src={warehouseForBooking.image} 
                   alt={warehouse.name} 
                   className="w-16 h-16 object-cover rounded-md mr-4"
                 />
@@ -268,7 +340,7 @@ const Payment = () => {
                 </div>
               </div>
               <div className="bg-primary/5 rounded-lg p-3 inline-block text-sm">
-                <span className="font-medium">Base Price:</span> {warehouse.price}
+                <span className="font-medium">Base Price:</span> ₹{warehouse.price} per metric ton per day
               </div>
             </div>
           )}
@@ -301,7 +373,7 @@ const Payment = () => {
               
               <div className="lg:col-span-1 order-1 lg:order-2">
                 <BookingSummary 
-                  warehouse={warehouse}
+                  warehouse={warehouseForBooking}
                   quantity={formData.quantity}
                   duration={formData.duration}
                   getTotalPrice={getTotalPrice}
