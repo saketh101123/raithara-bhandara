@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -251,7 +250,74 @@ const Payment = () => {
   };
 
   const handleDownloadPDF = () => {
-    toast.info("PDF generation would be implemented with a library like jsPDF");
+    // Create a simple HTML content for PDF generation
+    const content = `
+      <div style="font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #166534; padding-bottom: 20px;">
+          <h1 style="color: #166534; margin: 0;">Raithara Bhandara</h1>
+          <h2 style="color: #666; margin: 10px 0 0 0;">Booking Confirmation</h2>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="color: #166534; margin-top: 0;">Booking Details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; font-weight: bold;">Booking ID:</td><td>${bookingDetails.bookingId}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Customer:</td><td>${bookingDetails.userName}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Email:</td><td>${bookingDetails.userEmail}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Phone:</td><td>${bookingDetails.userPhone}</td></tr>
+          </table>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="color: #166534; margin-top: 0;">Storage Details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; font-weight: bold;">Warehouse:</td><td>${warehouse?.name}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Location:</td><td>${warehouse?.location}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Quantity:</td><td>${formData.quantity} metric tons</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Duration:</td><td>${formData.duration} days</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Start Date:</td><td>${formData.startDate}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold;">Total Amount:</td><td style="color: #166534; font-size: 18px;">₹${bookingDetails.totalAmount}</td></tr>
+          </table>
+        </div>
+        
+        <div style="text-align: center; color: #666; font-size: 14px; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px;">
+          <p>Thank you for choosing Raithara Bhandara for your storage needs.</p>
+          <p>For support, contact us at: support@raitharabhandara.com</p>
+          <p>Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+      </div>
+    `;
+
+    // Create a new window with the content for PDF generation
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error("Could not open PDF window. Please check your popup settings.");
+      return;
+    }
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Booking Confirmation - ${bookingDetails.bookingId}</title>
+          <meta charset="UTF-8">
+        </head>
+        <body>
+          ${content}
+          <script>
+            window.onload = function() { 
+              setTimeout(() => {
+                window.print();
+                // Close window after print dialog
+                setTimeout(() => window.close(), 1000);
+              }, 500);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    toast.success("PDF generation started. Please use your browser's print dialog to save as PDF.");
   };
 
   const handleGoBack = () => {

@@ -63,7 +63,7 @@ export const fetchWarehousesData = async (): Promise<WarehouseData[]> => {
       location: warehouse.location,
       rating: 4.5, // Default rating - could be calculated from reviews
       capacity: '5,000 metric tons', // Default capacity - could be added to database
-      price: `₹${warehouse.price} per load`,
+      price: `₹${warehouse.price} per metric ton per day`,
       distance: locationDistances[warehouse.location] || '50 km', // Use realistic distance or default
       image: coldStorageImages[index % coldStorageImages.length], // Assign different images cyclically
       available: warehouse.available,

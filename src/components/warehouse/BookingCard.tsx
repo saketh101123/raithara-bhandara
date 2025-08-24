@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CalendarDays, Clock, IndianRupee } from 'lucide-react';
 
 interface BookingCardProps {
   warehousePrice: string;
@@ -9,45 +10,52 @@ interface BookingCardProps {
   onBookNow: () => void;
 }
 
-const BookingCard = ({ 
-  warehousePrice, 
-  warehouseAvailability, 
-  onBookNow 
-}: BookingCardProps) => {
+const BookingCard = ({ warehousePrice, warehouseAvailability, onBookNow }: BookingCardProps) => {
   return (
-    <Card className="border-2 border-primary/10">
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-2xl font-bold">{warehousePrice}</h3>
-            <p className="text-sm text-muted-foreground">{warehouseAvailability}</p>
+    <Card className="shadow-lg border-2">
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center">
+          <IndianRupee className="w-5 h-5 mr-2 text-primary" />
+          Quick Booking
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="bg-primary/5 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium">Price:</span>
+            <span className="text-lg font-bold text-primary">{warehousePrice}</span>
           </div>
-          <div className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full">
-            Best Value
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Status:</span>
+            <span className={`font-medium ${warehouseAvailability === 'Available Now' ? 'text-green-600' : 'text-red-600'}`}>
+              {warehouseAvailability}
+            </span>
           </div>
         </div>
         
-        <div className="space-y-4 mt-6">
-          <div className="bg-muted p-3 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
-              Choose your storage quantity and duration on the next page.
-            </p>
-            <p className="text-sm font-medium">
-              Base rate: {warehousePrice}
-            </p>
+        <div className="space-y-3">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <CalendarDays className="w-4 h-4 mr-2" />
+            Flexible booking dates available
+          </div>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Clock className="w-4 h-4 mr-2" />
+            24/7 access and monitoring
           </div>
         </div>
-      </CardContent>
-      
-      <CardFooter>
+
         <Button 
-          onClick={onBookNow} 
-          className="w-full"
+          className="w-full h-12 text-lg font-semibold" 
+          onClick={onBookNow}
           disabled={warehouseAvailability !== 'Available Now'}
         >
-          Book Now
+          {warehouseAvailability === 'Available Now' ? 'Book Now' : 'Currently Unavailable'}
         </Button>
-      </CardFooter>
+        
+        <p className="text-xs text-muted-foreground text-center">
+          Secure booking • Instant confirmation • 24/7 support
+        </p>
+      </CardContent>
     </Card>
   );
 };
