@@ -43,6 +43,19 @@ const locationDistances = {
   'Yadgir, Karnataka': '540 km'
 };
 
+// Warehouses that need price adjustment (divided by 10)
+const adjustedPriceWarehouses = [
+  'ChillSpace Warehousing',
+  'IceBox Premium Storage', 
+  'SubZero Storage Co.',
+  'FreshKeep Cold Storage',
+  'CryoTech Warehouse',
+  'AgriChill Storage Hub',
+  'ZeroFrost Logistics',
+  'CoolVault Systems',
+  'FrostLine Cold Chain'
+];
+
 // Fetch warehouses from database
 export const fetchWarehousesData = async (): Promise<WarehouseData[]> => {
   try {
@@ -57,18 +70,24 @@ export const fetchWarehousesData = async (): Promise<WarehouseData[]> => {
     }
 
     // Transform database data to match the expected format
-    return warehouses?.map((warehouse, index) => ({
-      id: warehouse.id,
-      name: warehouse.name,
-      location: warehouse.location,
-      rating: 4.5, // Default rating - could be calculated from reviews
-      capacity: '5,000 metric tons', // Default capacity - could be added to database
-      price: `₹${warehouse.price} per metric ton per day`,
-      distance: locationDistances[warehouse.location] || '50 km', // Use realistic distance or default
-      image: coldStorageImages[index % coldStorageImages.length], // Assign different images cyclically
-      available: warehouse.available,
-      features: ['Temperature Control', 'Humidity Control', '24/7 Security', 'Loading Dock'] // Default features
-    })) || [];
+    return warehouses?.map((warehouse, index) => {
+      // Apply price adjustment for specific warehouses
+      const shouldAdjustPrice = adjustedPriceWarehouses.includes(warehouse.name);
+      const adjustedPrice = shouldAdjustPrice ? warehouse.price / 10 : warehouse.price;
+      
+      return {
+        id: warehouse.id,
+        name: warehouse.name,
+        location: warehouse.location,
+        rating: 4.5, // Default rating - could be calculated from reviews
+        capacity: '5,000 metric tons', // Default capacity - could be added to database
+        price: `₹${adjustedPrice} per metric ton per day`,
+        distance: locationDistances[warehouse.location] || '50 km', // Use realistic distance or default
+        image: coldStorageImages[index % coldStorageImages.length], // Assign different images cyclically
+        available: warehouse.available,
+        features: ['Temperature Control', 'Humidity Control', '24/7 Security', 'Loading Dock'] // Default features
+      };
+    }) || [];
   } catch (error) {
     console.error('Error in fetchWarehousesData:', error);
     return [];
