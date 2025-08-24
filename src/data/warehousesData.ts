@@ -24,6 +24,25 @@ const coldStorageImages = [
   '/lovable-uploads/e673a140-973c-4601-9768-33e696383838.png', // IceCap Cold Storage
 ];
 
+// Realistic distances from Bangalore to various locations in Karnataka
+const locationDistances = {
+  'Bangalore Rural, Karnataka': '25 km',
+  'Mysuru, Karnataka': '145 km', 
+  'Mandya, Karnataka': '98 km',
+  'Hassan, Karnataka': '187 km',
+  'Kolar, Karnataka': '68 km',
+  'Chikkaballapura, Karnataka': '59 km',
+  'Tumkur, Karnataka': '70 km',
+  'Shimoga, Karnataka': '275 km',
+  'Davangere, Karnataka': '265 km',
+  'Bidar, Karnataka': '685 km',
+  'Raichur, Karnataka': '415 km',
+  'Chitradurga, Karnataka': '202 km',
+  'Bagalkot, Karnataka': '515 km',
+  'Koppal, Karnataka': '365 km',
+  'Yadgir, Karnataka': '540 km'
+};
+
 // Fetch warehouses from database
 export const fetchWarehousesData = async (): Promise<WarehouseData[]> => {
   try {
@@ -44,8 +63,8 @@ export const fetchWarehousesData = async (): Promise<WarehouseData[]> => {
       location: warehouse.location,
       rating: 4.5, // Default rating - could be calculated from reviews
       capacity: '5,000 metric tons', // Default capacity - could be added to database
-      price: `₹${warehouse.price} per metric ton per day`,
-      distance: '0 km', // Default distance - could be calculated based on user location
+      price: `₹${warehouse.price} per load`,
+      distance: locationDistances[warehouse.location] || '50 km', // Use realistic distance or default
       image: coldStorageImages[index % coldStorageImages.length], // Assign different images cyclically
       available: warehouse.available,
       features: ['Temperature Control', 'Humidity Control', '24/7 Security', 'Loading Dock'] // Default features

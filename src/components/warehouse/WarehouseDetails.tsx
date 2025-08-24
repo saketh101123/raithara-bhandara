@@ -35,8 +35,8 @@ const WarehouseDetailsComponent = ({ warehouse }: WarehouseDetailsProps) => {
             </span>
           </div>
           <div className="flex justify-between items-center py-2">
-            <span className="text-foreground/70">Minimum Duration</span>
-            <span className="font-medium">1 Month</span>
+            <span className="text-foreground/70">Minimum Load</span>
+            <span className="font-medium">1 Metric Ton</span>
           </div>
         </div>
       </CardContent>

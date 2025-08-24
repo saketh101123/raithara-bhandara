@@ -8,7 +8,7 @@ const logisticsPlan = [
   {
     name: 'Basic Logistics',
     price: '₹299',
-    unit: 'per month',
+    unit: 'per load',
     description: 'Essential transport for local cold storage needs',
     features: [
       'Pickup from farm to nearest cold storage (within 20 km)',
@@ -30,7 +30,7 @@ const logisticsPlan = [
   {
     name: 'Standard Logistics',
     price: '₹699',
-    unit: 'per month',
+    unit: 'per load',
     description: 'Enhanced transport with dedicated vehicles and tracking',
     features: [
       'Pickup from farm to any cold storage within 50 km',
@@ -51,8 +51,8 @@ const logisticsPlan = [
   },
   {
     name: 'Advanced Logistics',
-    price: '₹999',
-    unit: 'per month',
+    price: 'Varies',
+    unit: 'contact team',
     description: 'Complete logistics solution with premium features',
     features: [
       'State-wide transport coverage (anywhere in Karnataka)',
@@ -71,15 +71,20 @@ const logisticsPlan = [
 
 const Pricing = () => {
   const handleBookPlan = (planId: string, planName: string, price: string) => {
-    // Store plan details in localStorage for the payment page
-    localStorage.setItem('selectedLogisticsPlan', JSON.stringify({
-      planId,
-      planName,
-      price,
-      type: 'logistics'
-    }));
-    // Navigate to logistics payment page
-    window.location.href = `/payment/logistics/${planId}`;
+    if (planId === 'advanced-logistics') {
+      // For advanced plan, redirect to contact page
+      window.location.href = '/contact';
+    } else {
+      // Store plan details in localStorage for the payment page
+      localStorage.setItem('selectedLogisticsPlan', JSON.stringify({
+        planId,
+        planName,
+        price,
+        type: 'logistics'
+      }));
+      // Navigate to logistics payment page
+      window.location.href = `/payment/logistics/${planId}`;
+    }
   };
 
   return (
@@ -125,7 +130,7 @@ const Pricing = () => {
                   variant={plan.highlight ? 'default' : 'outline'}
                   onClick={() => handleBookPlan(plan.planId, plan.name, plan.price)}
                 >
-                  Book This Plan
+                  {plan.planId === 'advanced-logistics' ? 'Contact Team' : 'Book This Plan'}
                 </Button>
 
                 <div className="space-y-4">
